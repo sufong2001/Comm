@@ -1,4 +1,3 @@
-using System;
 using AzureFunctions.Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +9,12 @@ using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage;
+using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Configurations.Resolvers;
+using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Share.Json;
 using System.IO;
 using System.Threading.Tasks;
-using Sufong2001.Comm.BusinessEntities;
-using Sufong2001.Comm.Models.Storage;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
@@ -38,12 +37,18 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
             await processQueue.CreateIfNotExistsAsync();
 
-            // update the OriginalEntity.Property value has cause some funny error without cloning the object
-            // System.Private.CoreLib: Exception while executing function: TransferEnd.
-            // Microsoft.Azure.WebJobs.Host: Error while handling parameter upload after function returned:.
-            // Microsoft.WindowsAzure.Storage: Not Found.
-            //
-            // upload.OriginalEntity.UploadEnd = app.DateTimeNow;
+            #region unexpected behaviour notes
+
+            /*
+            update the OriginalEntity.Property value has cause some funny error without cloning the object
+            System.Private.CoreLib: Exception while executing function: TransferEnd.
+            Microsoft.Azure.WebJobs.Host: Error while handling parameter upload after function returned:.
+            Microsoft.WindowsAzure.Storage: Not Found.
+
+            upload.OriginalEntity.UploadEnd = app.DateTimeNow;
+            */
+
+            #endregion unexpected behaviour notes
 
             upload = await upload.MoveTo(uploadTable, uploadSession => "completed"
                 , updateOriginalEntity: uploadSession =>
@@ -60,9 +65,9 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             }
 
             await processQueue.AddMessageAsync(new CloudQueueMessage(new UploadCompleted()
-                {
-                    SessionId = session
-                }.ToJson()
+            {
+                SessionId = session
+            }.ToJson()
             ));
 
             return new OkObjectResult(new { upload.RowKey });
