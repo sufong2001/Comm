@@ -16,6 +16,16 @@ namespace Sufong2001.Share.String
             return !string.IsNullOrEmpty(str);
         }
 
+        public static bool IsNullOrWhiteSpace(this string str)
+        {
+            return string.IsNullOrWhiteSpace(str);
+        }
+
+        public static bool IsNotNullOrWhiteSpace(this string str)
+        {
+            return !string.IsNullOrWhiteSpace(str);
+        }
+
         public static string Truncate(this string valueToTruncate, int startIndex = 0, int maxLength = 0
             , TruncateOptions options = TruncateOptions.FinishWord)
         {

@@ -1,3 +1,4 @@
+using System;
 using AzureFunctions.Autofac;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,12 +12,14 @@ using Sufong2001.Comm.Configurations.Resolvers;
 using System.IO;
 using System.Threading.Tasks;
 using Sufong2001.Comm.AzureStorage;
+using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Interfaces;
+using Sufong2001.Comm.Models.Storage;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
     [DependencyInjectionConfig(typeof(DiConfig))]
-    public static class TransferStart
+    public static class Start
     {
         [FunctionName(ServiceNames.TransferStart)]
         public static async Task<IActionResult> Run(
@@ -25,25 +28,27 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             [Blob("comm/upload")] CloudBlobDirectory uploadDir,
             [Table("CommUpload")] CloudTable uploadTmpTable,
             [Inject()] ITransferIdGenerator idGenerator,
+            [Inject()] App app,
             ILogger log)
         {
             await uploadDir.Container.CreateIfNotExistsAsync();
             await uploadTmpTable.CreateIfNotExistsAsync();
 
-            var transfer = new TransferEntity("temp")
+            var uploadSession = new UploadSession()
             {
-                RowKey = idGenerator.TransferSessionId(),
+                SessionId = idGenerator.TransferSessionId(),
+                UploadStart = app.DateTimeNow,
                 ManifestFile = filename,
             };
 
-            await transfer.CreateIn(uploadTmpTable);
+            await uploadSession.CreateIn(uploadTmpTable, "temp", uploadSession.SessionId);
 
 
-            await uploadDir.GetBlockBlobReference($"{transfer.RowKey}/{filename}")
+            await uploadDir.GetBlockBlobReference($"{uploadSession.SessionId}/{filename}")
                 .UploadFromStreamAsync(source: new StreamReader(req.Body).BaseStream);
 
 
-            return new OkObjectResult(new { transfer.RowKey});
+            return new OkObjectResult(new { uploadSession.SessionId });
         }
     }
 }

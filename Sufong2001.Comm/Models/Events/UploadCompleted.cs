@@ -4,9 +4,10 @@ using System.Text;
 
 namespace Sufong2001.Comm.AzureStorage
 {
-    public class ProcessMessage
+    public class UploadCompleted
     {
-        public string MessageKey { get; set; }
+        public string SessionId { get; set; }
+
         public int TryCount { get; set; }
     }
 }

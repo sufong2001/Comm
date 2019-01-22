@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Autofac;
+using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Interfaces;
 using Sufong2001.Comm.Models;
 
@@ -11,7 +12,8 @@ namespace Sufong2001.Comm.Configurations.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<IdGenerator>().SingleInstance().As<ITransferIdGenerator>();
+            builder.RegisterType<IdGenerator>().SingleInstance().As<ITransferIdGenerator>().As<IMessageIdGenerator>();
+            builder.RegisterType<App>().SingleInstance().AsSelf();
             //builder.RegisterType<Goodbyer>().Named<IGoodbyer>("Main");
             //builder.RegisterType<AlternateGoodbyer>().Named<IGoodbyer>("Secondary");
 

@@ -1,0 +1,20 @@
+﻿using System;
+
+namespace Sufong2001.Comm.Models.Storage
+{
+    public class UploadSession
+    {
+        public UploadSession() { }
+
+        public string SessionId { get; set; }
+
+        public DateTime? UploadStart { get; set; }
+
+        public DateTime? UploadEnd { get; set; }
+
+        public string ManifestFile { get; set; }
+
+        public string Errors { get; set; }
+
+    }
+}

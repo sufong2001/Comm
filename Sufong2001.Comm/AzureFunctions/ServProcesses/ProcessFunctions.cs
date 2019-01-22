@@ -20,15 +20,15 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
     {
         [FunctionName(ServiceNames.ProcessStarter)]
         public static async Task ProcessStarter(
-            [QueueTrigger("comm-process")] ProcessMessage message,
+            [QueueTrigger("comm-process")] UploadCompleted uploadCompleted,
             [Table("CommUpload")] CloudTable uploadTable,
             [OrchestrationClient] DurableOrchestrationClient starter,
             ILogger log)
         {
 
-            var orchestrationId = await starter.StartNewAsync(OrchestratorNames.ProcessMessage, message.MessageKey);
+            var orchestrationId = await starter.StartNewAsync(OrchestratorNames.ProcessMessage, uploadCompleted);
 
-            log.Log(LogLevel.Information, $"Started an orchestration {orchestrationId} for uploaded manifest {message.MessageKey}");
+            log.Log(LogLevel.Information, $"Started an orchestration {orchestrationId} for uploaded manifest {uploadCompleted.SessionId}");
         }
     }
 }

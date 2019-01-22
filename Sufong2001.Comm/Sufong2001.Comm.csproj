@@ -27,5 +27,6 @@
     <Folder Include="AzureFunctions\Activities\" />
     <Folder Include="AzureFunctions\ServOuts\" />
     <Folder Include="AzureFunctions\Orchestrators\" />
+    <Folder Include="AzureStorage\Entities\" />
   </ItemGroup>
 </Project>

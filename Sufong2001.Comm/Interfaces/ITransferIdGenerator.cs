@@ -4,4 +4,10 @@
     {
         string TransferSessionId();
     }
+
+    public interface IMessageIdGenerator
+    {
+        string MessageId();
+    }
+
 }
