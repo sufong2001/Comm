@@ -51,7 +51,7 @@ namespace Sufong2001.Comm.AzureStorage
 
         public static T CloneTo<T>(this T entity, string partitionKey) where T : ITableEntity
         {
-            var clone = entity.JsonClone<T>();
+            var clone = entity.JClone<T>();
 
             clone.PartitionKey = partitionKey;
 
@@ -66,7 +66,7 @@ namespace Sufong2001.Comm.AzureStorage
             // Microsoft.Azure.WebJobs.Host: Error while handling parameter upload after function returned:.
             // Microsoft.WindowsAzure.Storage: Not Found.
             // var oe = record.OriginalEntity;
-            var oe = record.OriginalEntity.JsonClone<T>();
+            var oe = record.OriginalEntity.JClone<T>();
 
             var moveEntity = new TableEntityAdapter<T>(
                 updateOriginalEntity == null ? oe : updateOriginalEntity(oe)

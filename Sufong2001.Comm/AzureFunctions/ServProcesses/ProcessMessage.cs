@@ -74,7 +74,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
         {
             var entities = new object[] { cm.Sms, cm.Email, cm.Postage }.Select((m, i) =>
             {
-                var e = m.JsonClone<Message>();
+                var e = m.JClone<Message>();
 
                 e.Reference = cm.Reference;
                 e.Title = cm.Title;

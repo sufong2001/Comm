@@ -32,7 +32,25 @@ namespace Sufong2001.Share.Json
             return obj != null ? obj.ToJson().To<T>() : default(T);
         }
 
-        public static T MapJsonTo<T>(this object[] objs, JsonMergeSettings mergeSettings = null)
+        /// <summary>
+        /// Clone the object utilising Newtonsoft.Json JObject
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static T JClone<T>(this object obj)
+        {
+            return obj != null ? obj.ToJObject().ToObject<T>() : default(T);
+        }
+
+        /// <summary>
+        /// Merge the objects utilising Newtonsoft.Json JObject
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="objs"></param>
+        /// <param name="mergeSettings"></param>
+        /// <returns></returns>
+        public static T MergeTo<T>(this object[] objs, JsonMergeSettings mergeSettings = null)
         {
             if (objs == null || !objs.Any()) return default(T);
 

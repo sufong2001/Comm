@@ -35,7 +35,7 @@ namespace Sufong2001.Share.Tests
                 new { O1 = "O1", P1 = "P1", C = "C1", A = new[] {"A1", "A4", "A5"}, B = new[] {(1, 2)}         },
                 new { O2 = "O2", P2 = "P2", C = "C2", A = new[] {"A2", "A4", "A6"}, B = new[] {(1, 2), (2, 3)} },
                 new { O3 = "O3", P3 = "P3", C = "C3", A = new[] {"A3", "A4", "A6"}, B = new[] {(1, 2), (3, 4)} },
-            }.MapJsonTo<MergedObject>();
+            }.MergeTo<MergedObject>();
 
             Assert.Equal("C3", merged.C);
             Assert.Equal("P1", merged.P1);

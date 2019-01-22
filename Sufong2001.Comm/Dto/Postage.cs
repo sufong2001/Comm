@@ -15,7 +15,7 @@ namespace Sufong2001.Comm.Dto
 
         public string[] Attachments { get; set; }
 
-        public ToAddress ToAddress() => new object[] { Address, this }.MapJsonTo<ToAddress>();
+        public ToAddress ToAddress() => new object[] { Address, this }.MergeTo<ToAddress>();
 
         public string[] PostalAddress() => ToAddress().ToLines();
     }
