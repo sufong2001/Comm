@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
-using Moq;
-using Sufong2001.Comm.AzureFunctions.ServIns;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Dto;
-using Sufong2001.Comm.Interfaces;
 using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.Json;
@@ -14,6 +11,7 @@ using Sufong2001.Test.AzureFunctions;
 using System;
 using Xunit;
 using Xunit.Abstractions;
+using static Sufong2001.Comm.AzureFunctions.ServIns.UploadFunctions;
 
 namespace Sufong2001.Comm.Tests.AzureFunctions
 {
@@ -26,7 +24,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
         public UploadTests(ITestOutputHelper output, AppicationBaseFixture app)
         {
-            this._output = output ?? throw new ArgumentNullException(nameof(output));
+            _output = output;
             _app = app;
         }
 
@@ -37,12 +35,11 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
 
-
-
-            var response = (OkObjectResult)await UploadFunctions.Start(request, CommunicationManifest.FileName,
+            // call Azure Function
+            var response = (OkObjectResult)await Start(request, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
-                new IdGenerator(), 
+                new IdGenerator(),
                 new App(),
                 _logger);
 
@@ -57,7 +54,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
 
-            var response = (OkObjectResult)await UploadFunctions.Continue(request,
+            // call Azure Function
+            var response = (OkObjectResult)await Continue(request,
                 "test",
                 $"{ DateTime.Now:u} Sample 1.pdf",
                 uploadDir,
@@ -80,7 +78,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
                 new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
 
-            var response = (OkObjectResult)await UploadFunctions.End(request,
+            // call Azure Function
+            var response = (OkObjectResult)await End(request,
                 "test",
                 $"{ DateTime.Now:u} Sample 2.pdf",
                 uploadDir,
@@ -103,11 +102,11 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
             var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
 
-            // call upload start 
-            var startResponse = (OkObjectResult)await UploadFunctions.Start(startRequest, CommunicationManifest.FileName,
+            // call upload start
+            var startResponse = (OkObjectResult)await Start(startRequest, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
-                new IdGenerator(), 
+                new IdGenerator(),
                 new App(),
                 _logger);
 
@@ -120,7 +119,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var tmpEntity = new TableEntityAdapter<UploadSession>(uploadSession, null, sessionId);
 
             // call upload end
-            var endResponse = (OkObjectResult)await UploadFunctions.End(endRequest,
+            var endResponse = (OkObjectResult)await End(endRequest,
                 sessionId,
                 $"{ DateTime.Now:u} Sample 2.pdf",
                 manifestDirectory,

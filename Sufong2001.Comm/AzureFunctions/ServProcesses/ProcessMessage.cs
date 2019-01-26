@@ -30,11 +30,11 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
 
             try
             {
-                var manifest = await ctx.CallActivityAsync<CommunicationManifest>(ActivityNames.ProcessManifest, uploadCompleted);
+                var result = await ctx.CallActivityAsync<IList<TableResult>>(ActivityNames.ProcessManifest, uploadCompleted);
 
-                log.Log(LogLevel.Information, manifest.ToJson());
+                log.Log(LogLevel.Information, result.ToJson());
 
-                return manifest;
+                return result;
             }
             catch (Exception e)
             {

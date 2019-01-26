@@ -35,10 +35,14 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             [Inject()] App app,
             ILogger log)
         {
-            await uploadDir.Container.CreateIfNotExistsAsync();
+
+#if !DEBUG
+            // uploadDir.Container cannot be mocked therefore it is excluded in the DEBUG mode
+            await uploadDir.Container.CreateIfNotExistsAsync();            
+#endif
             await uploadTmpTable.CreateIfNotExistsAsync();
 
-            var uploadSession = new UploadSession()
+            var uploadSession = new UploadSession
             {
                 SessionId = idGenerator.UploadSessionId(),
                 UploadStart = app.DateTimeNow,
