@@ -12,6 +12,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Sufong2001.Comm.Tests.AzureFunctions
 {
@@ -28,7 +29,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             _app = app;
         }
 
-        [Fact]
+        [Fact(Skip = "Not Ready to run")]
         public async void UploadMockTest()
         {
             var repos = new MockRepository(MockBehavior.Strict);

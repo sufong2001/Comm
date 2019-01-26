@@ -13,11 +13,11 @@ using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Configurations.Resolvers;
 using Sufong2001.Comm.Interfaces;
+using Sufong2001.Comm.Models.Events;
 using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Share.Json;
 using System.IO;
 using System.Threading.Tasks;
-using Sufong2001.Comm.Models.Events;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
@@ -45,7 +45,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 ManifestFile = filename
             };
 
-            await uploadSession.CreateIn(uploadTmpTable, "temp", uploadSession.SessionId);
+            await uploadSession.CreateIn(uploadTmpTable, UploadSessionPartitionKeys.Temp, uploadSession.SessionId);
 
             var uploadTo = uploadDir.GetBlockBlobReference($"{uploadSession.SessionId}/{filename}");
 
@@ -63,7 +63,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string session,
             string filename,
             [Blob(BlobNames.UploadDirectory + "/{session}")] CloudBlobDirectory uploadDir,
-            [Table(TableNames.CommUpload, "temp", "{session}")] UploadSession upload,
+            [Table(TableNames.CommUpload, UploadSessionPartitionKeys.Temp, "{session}")] UploadSession upload,
             ILogger log)
         {
             upload.LastUploadedFile = filename;
@@ -86,7 +86,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string filename,
             [Blob(BlobNames.UploadDirectory + "/{session}")] CloudBlobDirectory uploadDir,
             [Table(TableNames.CommUpload)] CloudTable uploadTable,
-            [Table(TableNames.CommUpload, "temp", "{session}")] TableEntityAdapter<UploadSession> upload,
+            [Table(TableNames.CommUpload, UploadSessionPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
             [Queue(QueueNames.CommProcess)] CloudQueue processQueue,
             [Inject()] App app,
             ILogger log)
@@ -108,7 +108,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
             #endregion unexpected behaviour notes
 
-            upload = await upload.MoveTo(uploadTable, uploadSession => "completed"
+            upload = await upload.MoveTo(uploadTable, uploadSession => UploadSessionPartitionKeys.Completed
                 , updateOriginalEntity: uploadSession =>
                 {
                     uploadSession.UploadEnd = app.DateTimeNow;

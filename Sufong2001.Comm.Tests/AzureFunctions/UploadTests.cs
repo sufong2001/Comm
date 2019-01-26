@@ -37,13 +37,12 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
 
-            var idGenerator = new Mock<IUploadIdGenerator>();
-            idGenerator.Setup(x => x.UploadSessionId()).Returns("test");
+
 
             var response = (OkObjectResult)await UploadFunctions.Start(request, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
-                idGenerator.Object,
+                new IdGenerator(), 
                 new App(),
                 _logger);
 
@@ -78,15 +77,15 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
             var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
 
-            var tmpEntity = new TableEntityAdapter<UploadSession>(
-                new UploadSession { SessionId = "test" }, null, null);
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
 
             var response = (OkObjectResult)await UploadFunctions.End(request,
                 "test",
                 $"{ DateTime.Now:u} Sample 2.pdf",
                 uploadDir,
                 uploadTmpTable,
-                tmpEntity,
+                tmpUploadEntity,
                 queue,
                 new App(),
                 _logger);

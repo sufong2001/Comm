@@ -4,8 +4,6 @@ namespace Sufong2001.Comm.Models.Storage
 {
     public class UploadSession
     {
-        public UploadSession() { }
-
         public string SessionId { get; set; }
 
         public DateTime? UploadStart { get; set; }
@@ -16,8 +14,6 @@ namespace Sufong2001.Comm.Models.Storage
 
         public string LastUploadedFile { get; set; }
 
-
         public string Errors { get; set; }
-
     }
 }
