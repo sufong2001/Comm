@@ -2,6 +2,8 @@
 {
     public class CommunicationManifest
     {
+        public const string FileName = "manifest.json";
+
         public string Reference { get; set; }
 
         public string Title { get; set; }

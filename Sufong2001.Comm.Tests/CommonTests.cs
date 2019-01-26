@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Sufong2001.Comm.AzureFunctions.ServProcesses;
+using Sufong2001.Comm.AzureStorage;
 using Sufong2001.Comm.Dto;
 using Sufong2001.Share.Json;
 using Sufong2001.Test.AzureFunctions;

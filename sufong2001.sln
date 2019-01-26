@@ -11,7 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Comm.Tests", "Su
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Test", "Sufong2001.Test\Sufong2001.Test.csproj", "{58ECB31F-0184-4FC7-9E39-23370AFED3A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sufong2001.Share.Tests", "Sufong2001.Share.Tests\Sufong2001.Share.Tests.csproj", "{4174C1BB-0AA2-486B-B359-38A5BA6C2015}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Share.Tests", "Sufong2001.Share.Tests\Sufong2001.Share.Tests.csproj", "{4174C1BB-0AA2-486B-B359-38A5BA6C2015}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Doc", "Doc", "{2ACCC80D-460B-4734-A807-B8B248AFC73A}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

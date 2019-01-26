@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Sufong2001.Comm.AzureStorage
+﻿namespace Sufong2001.Comm.Models.Events
 {
     public class UploadCompleted
     {

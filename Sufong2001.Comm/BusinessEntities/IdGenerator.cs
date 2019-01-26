@@ -3,9 +3,9 @@ using Sufong2001.Comm.Interfaces;
 
 namespace Sufong2001.Comm.BusinessEntities
 {
-    public class IdGenerator : ITransferIdGenerator, IMessageIdGenerator
+    public class IdGenerator : IUploadIdGenerator, IMessageIdGenerator
     {
-        public string TransferSessionId()
+        public string UploadSessionId()
         {
             return Guid.NewGuid().ToString();
         }

@@ -43,6 +43,22 @@ namespace Sufong2001.Share.Json
             return obj != null ? obj.ToJObject().ToObject<T>() : default(T);
         }
 
+
+        /// <summary>
+        /// If the pass-in object is same as the target Type, than it will be cast and return the same object as the target type.
+        /// Otherwise a new object will be created and copy all the mapping property values to the new object
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static T IsOrMap<T>(this object obj)
+        {
+            if (obj is T o) return o;
+
+
+            return obj != null ? obj.ToJObject().ToObject<T>() : default(T);
+        }
+
         /// <summary>
         /// Merge the objects utilising Newtonsoft.Json JObject
         /// </summary>

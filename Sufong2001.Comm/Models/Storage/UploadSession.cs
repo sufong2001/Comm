@@ -14,6 +14,9 @@ namespace Sufong2001.Comm.Models.Storage
 
         public string ManifestFile { get; set; }
 
+        public string LastUploadedFile { get; set; }
+
+
         public string Errors { get; set; }
 
     }

@@ -8,11 +8,11 @@ using Sufong2001.Comm.Models;
 
 namespace Sufong2001.Comm.Configurations.Modules
 {
-    public class TransferModule : Module
+    public class UploadModule : Module
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<IdGenerator>().SingleInstance().As<ITransferIdGenerator>().As<IMessageIdGenerator>();
+            builder.RegisterType<IdGenerator>().SingleInstance().As<IUploadIdGenerator>().As<IMessageIdGenerator>();
             builder.RegisterType<App>().SingleInstance().AsSelf();
             //builder.RegisterType<Goodbyer>().Named<IGoodbyer>("Main");
             //builder.RegisterType<AlternateGoodbyer>().Named<IGoodbyer>("Secondary");

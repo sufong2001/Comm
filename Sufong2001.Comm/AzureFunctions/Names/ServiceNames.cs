@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Sufong2001.Comm.AzureFunctions.Names
 {
-    static class ServiceNames
+    public static class ServiceNames
     {
         #region communication upload
 
-        public const string TransferStart    = "TransferStart";
-        public const string TransferContinue = "TransferContinue";
-        public const string TransferEnd      = "TransferEnd";
+        public const string UploadStart    = "UploadStart";
+        public const string UploadContinue = "UploadContinue";
+        public const string UploadEnd      = "UploadEnd";
 
         #endregion
 

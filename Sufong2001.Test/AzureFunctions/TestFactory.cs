@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Primitives;
 using Sufong2001.Test.Logging;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Sufong2001.Test.AzureFunctions
 {
@@ -17,7 +19,6 @@ namespace Sufong2001.Test.AzureFunctions
                 new object[] { "name", "Bill" },
                 new object[] { "name", "Paul" },
                 new object[] { "name", "Steve" }
-
             };
         }
 
@@ -30,12 +31,25 @@ namespace Sufong2001.Test.AzureFunctions
             return qs;
         }
 
-        public static DefaultHttpRequest CreateHttpRequest(string queryStringKey, string queryStringValue)
+        public static DefaultHttpRequest CreateHttpRequest(string queryStringKey, string queryStringValue, string body = null)
         {
             var request = new DefaultHttpRequest(new DefaultHttpContext())
             {
                 Query = new QueryCollection(CreateDictionary(queryStringKey, queryStringValue))
             };
+            return request;
+        }
+
+        public static DefaultHttpRequest CreateHttpRequestWithDataStream(string filePath)
+        {
+            var fileProvider = new PhysicalFileProvider(Directory.GetCurrentDirectory());
+            var stream = new MemoryStream(File.ReadAllBytes(fileProvider.GetFileInfo(filePath).PhysicalPath));
+
+            var request = new DefaultHttpRequest(new DefaultHttpContext())
+            {
+                Body = stream,
+            };
+
             return request;
         }
 

@@ -11,11 +11,11 @@ namespace Sufong2001.Comm.Workflows
         {
             var run = string.Empty;
 
-            run = ServiceNames.TransferStart;
+            run = ServiceNames.UploadStart;
 
-            run = ServiceNames.TransferContinue;
+            run = ServiceNames.UploadContinue;
 
-            run = ServiceNames.TransferEnd;
+            run = ServiceNames.UploadEnd;
 
             run = ServiceNames.ProcessStarter;
 

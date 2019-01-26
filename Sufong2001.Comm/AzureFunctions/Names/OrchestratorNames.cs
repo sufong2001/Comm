@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Sufong2001.Comm.AzureFunctions.Names
 {
-    static class OrchestratorNames
+    public static class OrchestratorNames
     {
         public const string ProcessMessage = "O_ProcessMessage";
     }

@@ -1,8 +1,8 @@
 ﻿namespace Sufong2001.Comm.Interfaces
 {
-    public interface ITransferIdGenerator
+    public interface IUploadIdGenerator
     {
-        string TransferSessionId();
+        string UploadSessionId();
     }
 
     public interface IMessageIdGenerator

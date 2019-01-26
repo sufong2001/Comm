@@ -13,7 +13,7 @@ namespace Sufong2001.Comm.Configurations.Resolvers
         {
             DependencyInjection.Initialize(builder =>
             {
-                builder.RegisterModule(new TransferModule());
+                builder.RegisterModule(new UploadModule());
             }, functionName);
         }
     }

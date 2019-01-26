@@ -1,5 +1,6 @@
 using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Share.Json;
+using Sufong2001.Share.String;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureStorage
 {
-    public static class StorageExtensions
+    public static class TableExtensions
     {
         public static async Task CreateIn<T>(this T record, CloudTable cloudTable, string partitionKey, string rowKey)
         {
@@ -74,18 +75,34 @@ namespace Sufong2001.Comm.AzureStorage
                 , rowKey == null ? record.RowKey : rowKey(oe)
             );
 
-            var deleteOperation = TableOperation.Delete(record);
-            var insertOperation = TableOperation.Insert(moveEntity);
+            var operations = new[]
+                {
+                    record.CreateOperationDelete(),
+                    moveEntity.CreateOperationInsert(),
+                }
+                .Where(op => op != null)
+                .Select(cloudTable.ExecuteAsync)
+                .ToArray();
 
-            var ops = new[]
-            {
-                cloudTable.ExecuteAsync(deleteOperation),
-                cloudTable.ExecuteAsync(insertOperation),
-            };
-
-            await Task.WhenAll(ops);
+            await Task.WhenAll(operations);
 
             return moveEntity;
+        }
+
+        /// <summary>
+        /// Create the delete TableOperation for the specified TableEntity.
+        /// If the ETag IsNullOrEmpty, the TableOperation will not be created and return null
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static TableOperation CreateOperationDelete(this TableEntity entity)
+        {
+            return entity.ETag.IsNullOrEmpty() ? null : TableOperation.Delete(entity);
+        }
+
+        public static TableOperation CreateOperationInsert(this TableEntity entity)
+        {
+            return TableOperation.Insert(entity);
         }
     }
 }
