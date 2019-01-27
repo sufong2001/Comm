@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Net.Http.Headers;
 using Sufong2001.Comm.AzureStorage;
+using Sufong2001.Comm.BusinessEntities;
 
 namespace Sufong2001.Comm.Tests.Base
 {
@@ -11,6 +12,8 @@ namespace Sufong2001.Comm.Tests.Base
     {
         public IConfiguration Configuration { get; }
         public CommRepository Repository { get; }
+
+        public IdGenerator IdGenerator => new IdGenerator();
 
         public ApplicationBaseFixture()
         {

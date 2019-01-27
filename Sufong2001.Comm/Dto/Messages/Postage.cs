@@ -1,7 +1,7 @@
 ﻿using Sufong2001.Comm.Dto.Interfaces;
 using Sufong2001.Share.Json;
 
-namespace Sufong2001.Comm.Dto
+namespace Sufong2001.Comm.Dto.Messages
 {
     public class Postage : IAttachments
     {

@@ -1,4 +1,4 @@
-﻿namespace Sufong2001.Comm.Dto
+﻿namespace Sufong2001.Comm.Dto.Messages
 {
     public class Sms
     {

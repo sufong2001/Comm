@@ -1,18 +1,16 @@
-﻿namespace Sufong2001.Comm.Dto
+﻿using System.Collections.Generic;
+
+namespace Sufong2001.Comm.Dto
 {
     public class CommunicationManifest
     {
         public const string FileName = "manifest.json";
 
-        public string Reference { get; set; }
+        public string CommunicationReference { get; set; }
 
         public string Title { get; set; }
 
-        public Email Email { get; set; }
-
-        public Sms Sms { get; set; }
-
-        public Postage Postage { get; set; }
+        public IEnumerable<Recipient> Recipients { get; set; }
 
         /// <summary>
         /// The list of the attachment file name for all the message which must be upload along with

@@ -1,6 +1,6 @@
 ﻿using Sufong2001.Comm.Dto.Interfaces;
 
-namespace Sufong2001.Comm.Dto
+namespace Sufong2001.Comm.Dto.Messages
 {
     public class Email : IAttachments
     {

@@ -1,28 +1,45 @@
+
 {
-  "Reference": "00001",
+  "CommunicationReference": "CommunicationReference01",
   "Title": "Test Title",
-  "Email":
-  {
-    "EmailSubject": "EmailSubject",
-    "EmailAddress": "EmailAddress",
-    "EmailContent": "EmailContent",
-    "Attachments": null
-  },
-  "Sms": { "Mobile": "0430 121 212", "SmsContent": "Sms Txt" },
-  "Postage": {
-    "FirstName": "FirstName",
-    "LastName": "LastName",
-    "Company": "Company",
-    "Address": {
-      "Line1": "Line1",
-      "Line2": "Line2",
-      "Line3": "Line3",
-      "State": "VIC",
-      "Suburb": "Melbourne",
-      "Postcode": "3000",
-      "Country": "AU"
-    },
-    "Attachments": ["file1-1.pdf"]
-  },
-  "Attachments": ["file1.pdf", "file2.pdf", "file3.pdf", "file5.pdf"]
+  "Recipients": [
+    {
+      "RecipientReference": "RecipientReference01",
+      "Email": {
+        "EmailSubject": "EmailSubject",
+        "EmailAddress": "EmailAddress",
+        "EmailContent": "EmailContent",
+        "Attachments": [
+          "Email file1.pdf"
+        ]
+      },
+      "Sms": {
+        "Mobile": "0430 121 212",
+        "SmsContent": "Sms Txt"
+      },
+      "Postage": {
+        "FirstName": "FirstName",
+        "LastName": "LastName",
+        "Company": "Company",
+        "Address": {
+          "Line1": "Line1",
+          "Line2": "Line2",
+          "Line3": "Line3",
+          "State": "VIC",
+          "Suburb": "Melbourne",
+          "Postcode": "3000",
+          "Country": "AU"
+        },
+        "Attachments": [
+          "Postage file1.pdf"
+        ]
+      },
+      "Attachments": [
+        "Recipient file.pdf"
+      ]
+    }
+  ],
+  "Attachments": [
+    "Common file.pdf"
+  ]
 }

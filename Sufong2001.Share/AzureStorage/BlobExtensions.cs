@@ -3,6 +3,7 @@ using Sufong2001.Share.String;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Sufong2001.Share.Json;
 
 namespace Sufong2001.Share.AzureStorage
 {
@@ -20,6 +21,13 @@ namespace Sufong2001.Share.AzureStorage
             await cloudBlockBlob.UploadFromStreamAsync(source: steam);
 
             return cloudBlockBlob;
+        }
+
+        public static async Task<T> DownloadTextAsAsync<T>(this CloudBlockBlob blob)
+        {
+            var str = await blob.DownloadTextAsync();
+
+            return str.To<T>();
         }
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Dto;
@@ -9,9 +10,6 @@ using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.Json;
 using Sufong2001.Test.AzureFunctions;
 using System;
-using Moq;
-using Newtonsoft.Json;
-using Sufong2001.Comm.Interfaces;
 using Xunit;
 using Xunit.Abstractions;
 using static Sufong2001.Comm.AzureFunctions.ServIns.UploadFunctions;
@@ -37,7 +35,6 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             //var idGenerator = new Mock<IUploadIdGenerator>();
             //idGenerator.Setup(x => x.UploadSessionId()).Returns("test");
 
-
             var request = TestFactory.CreateHttpRequestWithDataStream($"Data/{CommunicationManifest.FileName}");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
@@ -60,13 +57,18 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
         {
             var request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
 
             // call Azure Function
             var response = (OkObjectResult)await Continue(request,
                 "test",
-                $"{ DateTime.Now:u} Sample 1.pdf",
+                $"{DateTime.Now:u} Sample 1.pdf",
                 uploadDir,
-                new UploadSession { SessionId = "test" },
+                uploadTmpTable,
+                tmpUploadEntity,
                 _logger);
 
             Assert.NotNull(response.Value);

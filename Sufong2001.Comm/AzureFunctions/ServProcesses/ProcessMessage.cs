@@ -12,8 +12,10 @@ using Sufong2001.Share.Json;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.Models.Events;
+using Sufong2001.Share.AzureStorage;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Sufong2001.Comm.AzureFunctions.ServProcesses
@@ -50,14 +52,12 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
             [Inject()] IMessageIdGenerator idGenerator,
             ILogger log)
         {
-            var json = await manifest.DownloadTextAsync();
+            var communicationManifest = await manifest.DownloadTextAsAsync<CommunicationManifest>();
 
-            var communicationManifest = json.To<CommunicationManifest>();
-
-            var results = await communicationManifest.PrepareCommMessage(uploadCompleted.SessionId)
+            var results = await communicationManifest.PrepareCommMessage(uploadCompleted.SessionId, idGenerator)
                 .CreateIn(messageTable);
 
-            log.Log(LogLevel.Information, json);
+            log.Log(LogLevel.Information, communicationManifest.ToJson(Formatting.Indented));
 
             return results;
         }

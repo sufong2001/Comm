@@ -46,7 +46,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 LastUploadedFile = uploadTo.Name
             };
 
-            await uploadSession.CreateIn(uploadTmpTable, UploadSessionPartitionKeys.Temp, uploadSession.SessionId);
+            await uploadSession.CreateIn(uploadTmpTable, CommUploadPartitionKeys.Temp, uploadSession.SessionId);
 
             return new OkObjectResult(uploadSession);
         }
@@ -58,14 +58,16 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string session,
             string filename,
             [Blob(BlobNames.UploadDirectory + "/{session}")] CloudBlobDirectory uploadDir,
-            [Table(TableNames.CommUpload, UploadSessionPartitionKeys.Temp, "{session}")] UploadSession upload,
+            [Table(TableNames.CommUpload)] CloudTable uploadTable,
+            [Table(TableNames.CommUpload, CommUploadPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
             ILogger log)
         {
-            upload.LastUploadedFile = filename;
 
             var uploadTo = await req.Body.UploadTo(uploadDir, filename);
 
-            upload.LastUploadedFile = uploadTo.Name;
+            upload.OriginalEntity.LastUploadedFile = uploadTo.Name;
+
+            await upload.Update(uploadTable);
 
             return new OkObjectResult(upload);
         }
@@ -78,7 +80,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string filename,
             [Blob(BlobNames.UploadDirectory + "/{session}")] CloudBlobDirectory uploadDir,
             [Table(TableNames.CommUpload)] CloudTable uploadTable,
-            [Table(TableNames.CommUpload, UploadSessionPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
+            [Table(TableNames.CommUpload, CommUploadPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
             [Queue(QueueNames.CommProcess)] CloudQueue processQueue,
             [Inject()] App app,
             ILogger log)
@@ -86,7 +88,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             if (upload == null) return new BadRequestObjectResult("Invalid Session Id.");
 
             // save the file
-            await req.Body.UploadTo(uploadDir, filename);
+            var uploadTo = await req.Body.UploadTo(uploadDir, filename);
 
             #region unexpected behaviour notes
 
@@ -104,11 +106,12 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             UploadSession UpdateOriginalEntity(UploadSession uploadSession)
             {
                 uploadSession.UploadEnd = app.DateTimeNow;
+                uploadSession.LastUploadedFile = uploadTo.Name;
                 return uploadSession;
             }
 
             // close the upload session
-            upload = await upload.MoveTo(uploadTable, uploadSession => UploadSessionPartitionKeys.Completed
+            upload = await upload.MoveTo(uploadTable, uploadSession => CommUploadPartitionKeys.Completed
                 , updateOriginalEntity: UpdateOriginalEntity
             );
 

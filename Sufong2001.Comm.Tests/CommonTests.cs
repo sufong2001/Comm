@@ -1,14 +1,17 @@
 using Microsoft.WindowsAzure.Storage.Blob;
+using Newtonsoft.Json;
 using Sufong2001.Comm.AzureStorage;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.Dto;
+using Sufong2001.Comm.Dto.Messages;
 using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.Assembly;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.IO;
 using Sufong2001.Share.Json;
+using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using Sufong2001.Comm.BusinessEntities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -52,55 +55,76 @@ namespace Sufong2001.Comm.Tests
         {
             var cm = new CommunicationManifest()
             {
-                Reference = "00001",
+                CommunicationReference = "CommunicationReference01",
                 Title = "Test Title",
-                Sms = new Sms()
+                Recipients = new List<Recipient>()
                 {
-                    Mobile = "0430 121 212",
-
-                    SmsContent = "Sms Txt",
-                },
-                Email = new Email()
-                {
-                    EmailSubject = "EmailSubject",
-                    EmailAddress = "EmailAddress",
-                    EmailContent = "EmailContent",
-                },
-
-                Postage = new Postage()
-                {
-                    FirstName = "FirstName",
-                    LastName = "LastName",
-                    Company = "Company",
-                    Address = new Address()
+                    new Recipient()
                     {
-                        Line1 = "Line1",
-                        Line2 = "Line2",
-                        Line3 = "Line3",
-                        Suburb = "Melbourne",
-                        State = "VIC",
-                        Postcode = "3000",
-                        Country = "AU"
-                    },
-                    Attachments = new[]
-                    {
-                        "file1-1.pdf" ,
-                    },
-                },
+                        RecipientReference = "RecipientReference01",
 
+                        Sms = new Sms()
+                        {
+                            Mobile = "0430 121 212",
+
+                            SmsContent = "Sms Txt",
+                        },
+                        Email = new Email()
+                        {
+                            EmailSubject = "EmailSubject",
+                            EmailAddress = "EmailAddress",
+                            EmailContent = "EmailContent",
+                            Attachments = new[]
+                            {
+                                "Email file1.pdf",
+                            },
+                        },
+
+                        Postage = new Postage()
+                        {
+                            FirstName = "FirstName",
+                            LastName = "LastName",
+                            Company = "Company",
+                            Address = new Address()
+                            {
+                                Line1 = "Line1",
+                                Line2 = "Line2",
+                                Line3 = "Line3",
+                                Suburb = "Melbourne",
+                                State = "VIC",
+                                Postcode = "3000",
+                                Country = "AU"
+                            },
+                            Attachments = new[]
+                            {
+                                "Postage file1.pdf",
+                            },
+                        },
+
+                        Attachments = new[]
+                        {
+                            "Recipient file.pdf",
+                        },
+                    }
+                },
                 Attachments = new[]
                 {
-                    "file1.pdf" ,
-                    "file2.pdf" ,
-                    "file3.pdf" ,
-                    "file5.pdf" ,
-                },
+                    "Common file.pdf",
+                }
             };
 
-            var manifestKey = "test";
-            var entities = cm.PrepareCommMessage(manifestKey);
-
             _output.WriteLine(cm.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public void PrepareCommMessageTest()
+        {
+            var cm = $"Data/{CommunicationManifest.FileName}".ReadTo<CommunicationManifest>();
+
+            var manifestKey = "test";
+            var entities = cm.PrepareCommMessage(manifestKey, _app.IdGenerator);
+
+            _output.WriteLine(entities.ToJson(Formatting.Indented));
         }
 
         [Fact]
