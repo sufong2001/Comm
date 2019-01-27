@@ -3,15 +3,16 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.IO;
 using System.Net.Http.Headers;
+using Sufong2001.Comm.AzureStorage;
 
 namespace Sufong2001.Comm.Tests.Base
 {
-    public class AppicationBaseFixture
+    public class ApplicationBaseFixture
     {
         public IConfiguration Configuration { get; }
         public CommRepository Repository { get; }
 
-        public AppicationBaseFixture()
+        public ApplicationBaseFixture()
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())

@@ -24,6 +24,13 @@ namespace Sufong2001.Comm.AzureStorage
             await cloudTable.ExecuteAsync(insertOperation);
         }
 
+        public static async Task Update(this ITableEntity entity, CloudTable cloudTable)
+        {
+            var insertOperation = TableOperation.InsertOrReplace(entity);
+
+            await cloudTable.ExecuteAsync(insertOperation);
+        }
+
         public static async Task CreateIn<T>(this IEnumerable<T> records, CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey)
         {
             var entities = records

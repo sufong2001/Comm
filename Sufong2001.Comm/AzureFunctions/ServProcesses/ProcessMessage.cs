@@ -50,8 +50,6 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
             [Inject()] IMessageIdGenerator idGenerator,
             ILogger log)
         {
-            await messageTable.CreateIfNotExistsAsync();
-
             var json = await manifest.DownloadTextAsync();
 
             var communicationManifest = json.To<CommunicationManifest>();

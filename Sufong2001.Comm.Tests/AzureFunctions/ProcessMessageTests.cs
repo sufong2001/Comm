@@ -14,22 +14,23 @@ using Sufong2001.Test.AzureFunctions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 using static Sufong2001.Comm.AzureFunctions.ServProcesses.CommProcessors;
 
 namespace Sufong2001.Comm.Tests.AzureFunctions
 {
-    public class ProcessMessageTests : IClassFixture<AppicationBaseFixture>
+    public class ProcessMessageTests : IClassFixture<ApplicationBaseFixture>
     {
         private readonly ILogger _logger = TestFactory.CreateLogger();
 
         private readonly ITestOutputHelper _output;
-        private readonly AppicationBaseFixture _app;
+        private readonly ApplicationBaseFixture _app;
 
-        public ProcessMessageTests(ITestOutputHelper output, AppicationBaseFixture app)
+        public ProcessMessageTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
-            this._output = output;
+            _output = output;
             _app = app;
         }
 
@@ -56,12 +57,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             Assert.NotNull(result);
 
-            _output.WriteLine(result.ToJson());
-        }
-
-        private Task<IList<TableResult>> ProcessManifestFunction()
-        {
-            throw new NotImplementedException();
+            _output.WriteLine(result.ToJson(Formatting.Indented));
         }
 
         [Fact]
@@ -84,7 +80,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             Assert.NotNull(communicationManifest);
 
-            _output.WriteLine(communicationManifest.ToJson());
+            _output.WriteLine(communicationManifest.ToJson(Formatting.Indented));
         }
     }
 }

@@ -9,20 +9,23 @@ using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.Json;
 using Sufong2001.Test.AzureFunctions;
 using System;
+using Moq;
+using Newtonsoft.Json;
+using Sufong2001.Comm.Interfaces;
 using Xunit;
 using Xunit.Abstractions;
 using static Sufong2001.Comm.AzureFunctions.ServIns.UploadFunctions;
 
 namespace Sufong2001.Comm.Tests.AzureFunctions
 {
-    public class UploadTests : IClassFixture<AppicationBaseFixture>
+    public class UploadTests : IClassFixture<ApplicationBaseFixture>
     {
         private readonly ILogger _logger = TestFactory.CreateLogger();
 
         private readonly ITestOutputHelper _output;
-        private readonly AppicationBaseFixture _app;
+        private readonly ApplicationBaseFixture _app;
 
-        public UploadTests(ITestOutputHelper output, AppicationBaseFixture app)
+        public UploadTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
             _output = output;
             _app = app;
@@ -31,6 +34,10 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
         [Fact]
         public async void UploadStartTest()
         {
+            //var idGenerator = new Mock<IUploadIdGenerator>();
+            //idGenerator.Setup(x => x.UploadSessionId()).Returns("test");
+
+
             var request = TestFactory.CreateHttpRequestWithDataStream($"Data/{CommunicationManifest.FileName}");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
@@ -39,13 +46,13 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var response = (OkObjectResult)await Start(request, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
-                new IdGenerator(),
+                new IdGenerator(), // idGenerator.Object,
                 new App(),
                 _logger);
 
             Assert.NotNull(response.Value);
 
-            _output.WriteLine(response.Value.ToJson());
+            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
         }
 
         [Fact]
@@ -64,7 +71,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             Assert.NotNull(response.Value);
 
-            _output.WriteLine(response.Value.ToJson());
+            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
         }
 
         [Fact]
@@ -91,7 +98,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             Assert.NotNull(response.Value);
 
-            _output.WriteLine(response.Value.ToJson());
+            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
         }
 
         [Fact]
@@ -131,7 +138,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             Assert.NotNull(endResponse.Value);
 
-            _output.WriteLine(endResponse.Value.ToJson());
+            _output.WriteLine(endResponse.Value.ToJson(Formatting.Indented));
         }
 
         /*

@@ -1,27 +1,54 @@
-using Microsoft.Extensions.Logging;
-using Sufong2001.Comm.AzureFunctions.ServProcesses;
+using Microsoft.WindowsAzure.Storage.Blob;
 using Sufong2001.Comm.AzureStorage;
+using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.Dto;
+using Sufong2001.Comm.Tests.Base;
+using Sufong2001.Share.Assembly;
+using Sufong2001.Share.AzureStorage;
+using Sufong2001.Share.IO;
 using Sufong2001.Share.Json;
-using Sufong2001.Test.AzureFunctions;
+using System.Linq;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Sufong2001.Comm.Tests
 {
-    public class CommonTests
+    public class CommonTests : IClassFixture<ApplicationBaseFixture>
     {
-        private readonly ILogger _logger = TestFactory.CreateLogger();
+        private readonly ITestOutputHelper _output = null;
+        private readonly ApplicationBaseFixture _app = null;
 
-        private readonly ITestOutputHelper output;
-
-        public CommonTests(ITestOutputHelper output)
+        public CommonTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
-            this.output = output;
+            _output = output;
+            _app = app;
         }
 
         [Fact]
-        public void GetCommunicationManifestJson()
+        public async void RepositoryCreateStorageIfNotExistsTest()
+        {
+            var results = await _app.Repository.CreateStorageIfNotExists();
+
+            CloudBlockBlob uploadTo = null;
+
+            if (results.Any(r => r))
+            {
+                var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+
+                uploadTo = await $"Data/{CommunicationManifest.FileName}".CreateStream()
+                    .UploadTo(uploadDir, $"test/{CommunicationManifest.FileName}");
+            }
+
+            _output.WriteLine(new
+            {
+                results,
+                uploadTo?.Name
+            }.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public void GetCommunicationManifestJsonTest()
         {
             var cm = new CommunicationManifest()
             {
@@ -73,7 +100,17 @@ namespace Sufong2001.Comm.Tests
             var manifestKey = "test";
             var entities = cm.PrepareCommMessage(manifestKey);
 
-            output.WriteLine(cm.ToJson());
+            _output.WriteLine(cm.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public void GetStaticFieldInfosTest()
+        {
+            var values = typeof(TableNames).GetStaticFieldInfos()
+                .Select(f => f.GetValue(null).ToString())
+                .ToArray();
+
+            _output.WriteLine(values.ToJson(Formatting.Indented));
         }
     }
 }

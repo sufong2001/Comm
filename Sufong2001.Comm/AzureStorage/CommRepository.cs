@@ -1,11 +1,14 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using Sufong2001.Comm.AzureStorage.Names;
+using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
 using System.Linq;
-using Microsoft.WindowsAzure.Storage.Queue;
+using System.Threading.Tasks;
 
-namespace Sufong2001.Comm.Tests.Base
+namespace Sufong2001.Comm.AzureStorage
 {
     public class CommRepository
     {
@@ -15,25 +18,47 @@ namespace Sufong2001.Comm.Tests.Base
 
         public CommRepository(string connectionString)
         {
-            CloudStorageAccount cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
 
             _blobClient = cloudStorageAccount.CreateCloudBlobClient();
 
             _cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
 
             _cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
+        }
 
+        public async Task<bool[]> CreateStorageIfNotExists()
+        {
+            var cloudTables = typeof(TableNames).GetStaticValues()
+                 .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())
+                 .ToArray();
+
+            var cloudQueues = typeof(QueueNames).GetStaticValues()
+                .Select(n => _cloudQueueClient.GetQueueReference(n).CreateIfNotExistsAsync())
+                .ToArray();
+
+            var cloudBlobs = typeof(BlobNames).GetStaticValues()
+                .Select(n => n.Split("/").First())
+                .Distinct()
+                .Select(n => _blobClient.GetContainerReference(n).CreateIfNotExistsAsync())
+                .ToArray();
+
+            var tasks = cloudTables.Concat(cloudQueues).Concat(cloudBlobs);
+
+            return await Task.WhenAll(tasks);
         }
 
         public CloudQueue GetQueue(string queueName)
         {
             var cloudQueue = _cloudQueueClient.GetQueueReference(queueName);
+
             return cloudQueue;
         }
 
         public CloudTable GetTable(string tableName)
         {
             var cloudTable = _cloudTableClient.GetTableReference(tableName);
+
             return cloudTable;
         }
 
@@ -44,8 +69,6 @@ namespace Sufong2001.Comm.Tests.Base
             var relativePath = folders.Skip(1).ToArray().ArrayToString("/");
 
             var cloudBlobDirectory = _blobClient.GetContainerReference(container).GetDirectoryReference(relativePath);
-
-            cloudBlobDirectory.Container.CreateIfNotExistsAsync().ConfigureAwait(true);
 
             return cloudBlobDirectory;
         }

@@ -13,21 +13,22 @@ using Sufong2001.Test.AzureFunctions;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Sufong2001.Comm.Tests.AzureFunctions
 {
-    public class UploadMockTests : IClassFixture<AppicationBaseFixture>
+    public class UploadMockTests : IClassFixture<ApplicationBaseFixture>
     {
         private readonly ILogger _logger = TestFactory.CreateLogger();
 
         private readonly ITestOutputHelper _output;
-        private readonly AppicationBaseFixture _app;
+        private readonly ApplicationBaseFixture _app;
 
-        public UploadMockTests(ITestOutputHelper output, AppicationBaseFixture app)
+        public UploadMockTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
-            this._output = output;
+            _output = output;
             _app = app;
         }
 
@@ -62,7 +63,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             repos.VerifyAll();
 
-            _output.WriteLine(response.Value.ToJson());
+            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
         }
     }
 }

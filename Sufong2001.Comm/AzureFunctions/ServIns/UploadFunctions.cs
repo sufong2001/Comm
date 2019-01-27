@@ -15,8 +15,7 @@ using Sufong2001.Comm.Configurations.Resolvers;
 using Sufong2001.Comm.Interfaces;
 using Sufong2001.Comm.Models.Events;
 using Sufong2001.Comm.Models.Storage;
-using Sufong2001.Share.Json;
-using System.IO;
+using Sufong2001.Share.AzureStorage;
 using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
@@ -31,31 +30,23 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string filename,
             [Blob(BlobNames.UploadDirectory)] CloudBlobDirectory uploadDir,
             [Table(TableNames.CommUpload)] CloudTable uploadTmpTable,
-            [Inject()] IUploadIdGenerator idGenerator,
-            [Inject()] App app,
+            [Inject] IUploadIdGenerator idGenerator,
+            [Inject] App app,
             ILogger log)
         {
+            var sessionId = idGenerator.UploadSessionId();
 
-#if !DEBUG
-            // uploadDir.Container cannot be mocked therefore it is excluded in the DEBUG mode
-            await uploadDir.Container.CreateIfNotExistsAsync();            
-#endif
-            await uploadTmpTable.CreateIfNotExistsAsync();
+            var uploadTo = await req.Body.UploadTo(uploadDir, $"{sessionId}/{filename}");
 
             var uploadSession = new UploadSession
             {
-                SessionId = idGenerator.UploadSessionId(),
+                SessionId = sessionId,
                 UploadStart = app.DateTimeNow,
-                ManifestFile = filename
+                ManifestFile = filename,
+                LastUploadedFile = uploadTo.Name
             };
 
             await uploadSession.CreateIn(uploadTmpTable, UploadSessionPartitionKeys.Temp, uploadSession.SessionId);
-
-            var uploadTo = uploadDir.GetBlockBlobReference($"{uploadSession.SessionId}/{filename}");
-
-            await uploadTo.UploadFromStreamAsync(source: new StreamReader(req.Body).BaseStream);
-
-            uploadSession.LastUploadedFile = uploadTo.Name;
 
             return new OkObjectResult(uploadSession);
         }
@@ -72,9 +63,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
         {
             upload.LastUploadedFile = filename;
 
-            var uploadTo = uploadDir.GetBlockBlobReference(filename);
-
-            await uploadTo.UploadFromStreamAsync(source: new StreamReader(req.Body).BaseStream);
+            var uploadTo = await req.Body.UploadTo(uploadDir, filename);
 
             upload.LastUploadedFile = uploadTo.Name;
 
@@ -83,8 +72,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
         [FunctionName(ServiceNames.UploadEnd)]
         public static async Task<IActionResult> End(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route =
-                ServiceNames.UploadEnd + "/{session}/{filename?}")]
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = ServiceNames.UploadEnd + "/{session}/{filename?}")]
             HttpRequest req,
             string session,
             string filename,
@@ -97,7 +85,8 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
         {
             if (upload == null) return new BadRequestObjectResult("Invalid Session Id.");
 
-            await processQueue.CreateIfNotExistsAsync();
+            // save the file
+            await req.Body.UploadTo(uploadDir, filename);
 
             #region unexpected behaviour notes
 
@@ -112,25 +101,19 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
             #endregion unexpected behaviour notes
 
-            upload = await upload.MoveTo(uploadTable, uploadSession => UploadSessionPartitionKeys.Completed
-                , updateOriginalEntity: uploadSession =>
-                {
-                    uploadSession.UploadEnd = app.DateTimeNow;
-                    return uploadSession;
-                }
-            );
-
-            if (filename != null)
+            UploadSession UpdateOriginalEntity(UploadSession uploadSession)
             {
-                await uploadDir.GetBlockBlobReference(filename)
-                    .UploadFromStreamAsync(source: new StreamReader(req.Body).BaseStream);
+                uploadSession.UploadEnd = app.DateTimeNow;
+                return uploadSession;
             }
 
-            await processQueue.AddMessageAsync(new CloudQueueMessage(new UploadCompleted()
-            {
-                SessionId = session
-            }.ToJson()
-            ));
+            // close the upload session
+            upload = await upload.MoveTo(uploadTable, uploadSession => UploadSessionPartitionKeys.Completed
+                , updateOriginalEntity: UpdateOriginalEntity
+            );
+
+            // raise the UploadCompleted event
+            await new UploadCompleted { SessionId = session }.AddMessageToAsync(processQueue);
 
             return new OkObjectResult(upload);
         }
