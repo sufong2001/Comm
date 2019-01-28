@@ -2,19 +2,19 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
+using Newtonsoft.Json;
 using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Dto;
 using Sufong2001.Comm.Models.Events;
+using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.IO;
 using Sufong2001.Share.Json;
 using Sufong2001.Test.AzureFunctions;
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Sufong2001.Comm.AzureFunctions.ServProcesses.CommProcessors;
@@ -35,7 +35,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
         }
 
         [Fact]
-        public async void ProcessMessageTest()
+        public async void Should_ProcessMessageTest_Created_3_Messages()
         {
             var id = new IdGenerator();
             var uploadCompleted = $"Data/UploadCompleted.json".ReadTo<UploadCompleted>();
@@ -55,13 +55,16 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             // call Orchestrator function
             var result = await ProcessMessageOrchestrator(durableOrchestrationContextBase.Object, _logger);
 
-            Assert.NotNull(result);
+            durableOrchestrationContextBase.Verify();
+
+            Assert.Equal(3, result.Count);
+            Assert.True(result.All(r => r.Result.IsOrMap<TableEntityAdapter<Message>>().PartitionKey == "Created"));
 
             _output.WriteLine(result.ToJson(Formatting.Indented));
         }
 
         [Fact]
-        public async void ProcessManifestActivityTest()
+        public async void Should_ProcessManifestActivity_Created_3_Messages()
         {
             var uploadCompleted = $"Data/UploadCompleted.json".ReadTo<UploadCompleted>();
             var uploadBlob = _app.Repository.GetBlockBlob(BlobNames.UploadDirectory + "/test/" + CommunicationManifest.FileName);
@@ -71,16 +74,17 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             uploadCompleted.SessionId = id.UploadSessionId();
 
-            var communicationManifest = await ProcessManifestActivity(
+            var result = await ProcessManifestActivity(
                 uploadCompleted,
                 uploadBlob,
                 messageTable,
                 id,
                 _logger);
 
-            Assert.NotNull(communicationManifest);
+            Assert.Equal(3, result.Count);
+            Assert.True(result.All(r => r.Result.IsOrMap<TableEntityAdapter<Message>>().PartitionKey == "Created"));
 
-            _output.WriteLine(communicationManifest.ToJson(Formatting.Indented));
+            _output.WriteLine(result.ToJson(Formatting.Indented));
         }
     }
 }

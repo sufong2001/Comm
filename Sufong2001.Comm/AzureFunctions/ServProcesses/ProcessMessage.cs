@@ -24,25 +24,18 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
     public static class CommProcessors
     {
         [FunctionName(OrchestratorNames.ProcessMessage)]
-        public static async Task<object> ProcessMessageOrchestrator(
+        public static async Task<IList<TableResult>> ProcessMessageOrchestrator(
             [OrchestrationTrigger] DurableOrchestrationContextBase ctx,
             ILogger log)
         {
             var uploadCompleted = ctx.GetInput<UploadCompleted>();
 
-            try
-            {
-                var result = await ctx.CallActivityAsync<IList<TableResult>>(ActivityNames.ProcessManifest, uploadCompleted);
+            var result = await ctx.CallActivityAsync<IList<TableResult>>(ActivityNames.ProcessManifest, uploadCompleted);
 
-                log.Log(LogLevel.Information, result.ToJson());
+            log.Log(LogLevel.Information, result.ToJson());
 
-                return result;
-            }
-            catch (Exception e)
-            {
-            }
+            return result;
 
-            return new { Error = "Failed to process message" };
         }
 
         [FunctionName(ActivityNames.ProcessManifest)]

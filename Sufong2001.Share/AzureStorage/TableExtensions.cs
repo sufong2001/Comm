@@ -6,38 +6,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Sufong2001.Comm.AzureStorage
+namespace Sufong2001.Share.AzureStorage
 {
     public static class TableExtensions
     {
-        public static async Task CreateIn<T>(this T record, CloudTable cloudTable, string partitionKey, string rowKey)
+        public static async Task<TableResult> CreateIn<T>(this T record, CloudTable cloudTable, string partitionKey, string rowKey)
         {
-            var entity = new TableEntityAdapter<T>(record, partitionKey, rowKey);
+            var entity = record.CreatTableEntity(partitionKey, rowKey);
 
-            await entity.CreateIn(cloudTable);
+            var result = await entity.CreateIn(cloudTable);
+
+            return result;
         }
 
-        public static async Task CreateIn(this ITableEntity entity, CloudTable cloudTable)
+        public static async Task<TableResult> CreateIn(this ITableEntity entity, CloudTable cloudTable)
         {
-            var insertOperation = TableOperation.Insert(entity);
+            var insertOperation = entity.CreateOperationInsert();
 
-            await cloudTable.ExecuteAsync(insertOperation);
+            var result = await cloudTable.ExecuteAsync(insertOperation);
+
+            return result;
         }
 
-        public static async Task Update(this ITableEntity entity, CloudTable cloudTable)
+        public static async Task<TableResult> Update(this ITableEntity entity, CloudTable cloudTable)
         {
-            var insertOperation = TableOperation.InsertOrReplace(entity);
+            var insertOperation = entity.CreateOperationInsertOrReplace();
 
-            await cloudTable.ExecuteAsync(insertOperation);
+            var result = await cloudTable.ExecuteAsync(insertOperation);
+
+            return result;
         }
 
-        public static async Task CreateIn<T>(this IEnumerable<T> records, CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey)
+        public static async Task<IList<TableResult>> CreateIn<T>(this IEnumerable<T> records, CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey)
         {
             var entities = records
-                .Select(e => new TableEntityAdapter<T>(e, partitionKey(e), rowKey(e)))
+                .Select(e => e.CreatTableEntity(partitionKey(e), rowKey(e)))
                 .ToArray();
 
-            await entities.CreateIn(cloudTable);
+            var results = await entities.CreateIn(cloudTable);
+
+            return results;
         }
 
         public static async Task<IList<TableResult>> CreateIn(this IEnumerable<ITableEntity> entities, CloudTable cloudTable)
@@ -102,14 +110,24 @@ namespace Sufong2001.Comm.AzureStorage
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public static TableOperation CreateOperationDelete(this TableEntity entity)
+        public static TableOperation CreateOperationDelete(this ITableEntity entity)
         {
             return entity.ETag.IsNullOrEmpty() ? null : TableOperation.Delete(entity);
         }
 
-        public static TableOperation CreateOperationInsert(this TableEntity entity)
+        public static TableOperation CreateOperationInsert(this ITableEntity entity)
         {
             return TableOperation.Insert(entity);
+        }
+
+        public static TableOperation CreateOperationInsertOrReplace(this ITableEntity entity)
+        {
+            return TableOperation.InsertOrReplace(entity);
+        }
+
+        public static TableEntityAdapter<T> CreatTableEntity<T>(this T record, string partitionKey, string rowKey)
+        {
+            return new TableEntityAdapter<T>(record, partitionKey, rowKey);
         }
     }
 }

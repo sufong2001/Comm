@@ -31,7 +31,7 @@ namespace Sufong2001.Test.AzureFunctions
             return qs;
         }
 
-        public static DefaultHttpRequest CreateHttpRequest(string queryStringKey, string queryStringValue, string body = null)
+        public static DefaultHttpRequest CreateHttpRequest(string queryStringKey, string queryStringValue)
         {
             var request = new DefaultHttpRequest(new DefaultHttpContext())
             {

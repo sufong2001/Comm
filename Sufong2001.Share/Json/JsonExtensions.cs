@@ -55,7 +55,6 @@ namespace Sufong2001.Share.Json
         {
             if (obj is T o) return o;
 
-
             return obj != null ? obj.ToJObject().ToObject<T>() : default(T);
         }
 

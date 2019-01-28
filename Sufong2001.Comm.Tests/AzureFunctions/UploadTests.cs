@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.WindowsAzure.Storage.Table;
@@ -30,7 +31,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
         }
 
         [Fact]
-        public async void UploadStartTest()
+        public async void Should_UploadStart_Success_200_Manifest()
         {
             //var idGenerator = new Mock<IUploadIdGenerator>();
             //idGenerator.Setup(x => x.UploadSessionId()).Returns("test");
@@ -40,20 +41,101 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
 
             // call Azure Function
-            var response = (OkObjectResult)await Start(request, CommunicationManifest.FileName,
+            var response = (ObjectResult)await Start(request, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
                 new IdGenerator(), // idGenerator.Object,
                 new App(),
                 _logger);
 
-            Assert.NotNull(response.Value);
+            var upload = response.Value.IsOrMap<UploadSession>();
 
-            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.NotEmpty(upload.ManifestFile);
+            Assert.Contains(CommunicationManifest.FileName, upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
         }
 
         [Fact]
-        public async void UploadContinueTest()
+        public async void Should_UploadStart_Success_200_Pdf()
+        {
+            //var idGenerator = new Mock<IUploadIdGenerator>();
+            //idGenerator.Setup(x => x.UploadSessionId()).Returns("test");
+
+            var request = TestFactory.CreateHttpRequestWithDataStream($"Data/Sample 1.pdf");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            // call Azure Function
+            var response = (ObjectResult)await Start(request, "Sample 1.pdf",
+                uploadDir,
+                uploadTmpTable,
+                new IdGenerator(), // idGenerator.Object,
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadStart_Fail_400_With_No_Data()
+        {
+            var request = TestFactory.CreateHttpRequest("none", "nil");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            // call Azure Function
+            var response = (ObjectResult)await Start(request, CommunicationManifest.FileName,
+                uploadDir,
+                uploadTmpTable,
+                new IdGenerator(), // idGenerator.Object,
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Null(upload.LastUploadedFile);
+            Assert.Equal("No file data has been uploaded\r\nParameter name: stream", upload.Errors);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadStart_Fail_400_With_No_Filename()
+        {
+            var request = TestFactory.CreateHttpRequestWithDataStream($"Data/Sample 1.pdf");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            // call Azure Function
+            var response = (ObjectResult)await Start(request, null,
+                uploadDir,
+                uploadTmpTable,
+                new IdGenerator(), // idGenerator.Object,
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Null(upload.LastUploadedFile);
+            Assert.Equal("A filename is required.\r\nParameter name: filename", upload.Errors);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadContinue_Success_200_Pdf()
         {
             var request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
@@ -63,7 +145,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
 
             // call Azure Function
-            var response = (OkObjectResult)await Continue(request,
+            var response = (ObjectResult)await Continue(request,
                 "test",
                 $"{DateTime.Now:u} Sample 1.pdf",
                 uploadDir,
@@ -71,13 +153,76 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 tmpUploadEntity,
                 _logger);
 
-            Assert.NotNull(response.Value);
+            var upload = response.Value.IsOrMap<UploadSession>();
 
-            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Contains("test", upload.SessionId);
+            Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
         }
 
         [Fact]
-        public async void UploadEndTest()
+        public async void Should_UploadContinue_Fail_400_With_No_Data()
+        {
+            var request = TestFactory.CreateHttpRequest("none", "nil");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
+
+            // call Azure Function
+            var response = (ObjectResult)await Continue(request,
+                "test",
+                $"{DateTime.Now:u} Sample 1.pdf",
+                uploadDir,
+                uploadTmpTable,
+                tmpUploadEntity,
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Null(upload.LastUploadedFile);
+            Assert.Equal("No file data has been uploaded\r\nParameter name: stream", upload.Errors);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadContinue_Fail_400_With_No_Filename()
+        {
+            var request = TestFactory.CreateHttpRequestWithDataStream($"Data/Sample 1.pdf");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
+
+            // call Azure Function
+            var response = (ObjectResult)await Continue(request,
+                "test",
+                "",
+                uploadDir,
+                uploadTmpTable,
+                tmpUploadEntity,
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Null(upload.LastUploadedFile);
+            Assert.Equal("A filename is required.\r\nParameter name: filename", upload.Errors);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadEnd_Success_200_Pdf()
         {
             var request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 2.pdf");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
@@ -88,9 +233,9 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
 
             // call Azure Function
-            var response = (OkObjectResult)await End(request,
+            var response = (ObjectResult)await End(request,
                 "test",
-                $"{ DateTime.Now:u} Sample 2.pdf",
+                $"{DateTime.Now:u} Sample 2.pdf",
                 uploadDir,
                 uploadTmpTable,
                 tmpUploadEntity,
@@ -98,39 +243,138 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 new App(),
                 _logger);
 
-            Assert.NotNull(response.Value);
+            var upload = response.Value.IsOrMap<UploadSession>();
 
-            _output.WriteLine(response.Value.ToJson(Formatting.Indented));
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.NotNull(upload.UploadEnd);
+            Assert.Contains("Sample 2.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
         }
 
         [Fact]
-        public async void UploadCompletedTest()
+        public async void Should_UploadEnd_Success_200_Pdf_With_No_Filename()
         {
-            var startRequest = TestFactory.CreateHttpRequestWithDataStream($"Data/{CommunicationManifest.FileName}");
+            var request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 2.pdf");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+            var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
+
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
+
+            // call Azure Function
+            var response = (ObjectResult)await End(request,
+                "test",
+                "",
+                uploadDir,
+                uploadTmpTable,
+                tmpUploadEntity,
+                queue,
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.NotNull(upload.UploadEnd);
+            Assert.Null(upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_UploadEnd_Fail_400_With_No_Data()
+        {
+            var request = TestFactory.CreateHttpRequest("none", "nil");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + "/test");
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+            var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
+
+            var tmpUploadEntity = new TableEntityAdapter<UploadSession>(
+                new UploadSession { SessionId = "test" }, "test", new IdGenerator().UploadSessionId());
+
+            // call Azure Function
+            var response = (ObjectResult)await End(request,
+                "test",
+                $"{DateTime.Now:u} Sample 2.pdf",
+                uploadDir,
+                uploadTmpTable,
+                tmpUploadEntity,
+                queue,
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status400BadRequest, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Null(upload.LastUploadedFile);
+            Assert.Null(upload.UploadEnd);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_Upload_Completed_With_Manifest_First()
+        {
+            var request = TestFactory.CreateHttpRequestWithDataStream($"Data/{CommunicationManifest.FileName}");
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
             var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
 
-            // call upload start
-            var startResponse = (OkObjectResult)await Start(startRequest, CommunicationManifest.FileName,
+            // call step1 upload start
+            var response = (ObjectResult)await Start(request, CommunicationManifest.FileName,
                 uploadDir,
                 uploadTmpTable,
                 new IdGenerator(),
                 new App(),
                 _logger);
 
-            var uploadSession = startResponse.Value.IsOrMap<UploadSession>();
-            var sessionId = uploadSession.SessionId;
+            var upload = response.Value.IsOrMap<UploadSession>();
 
-            var endRequest = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 2.pdf");
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.NotNull(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.Null(upload.UploadEnd);
+            Assert.Contains(CommunicationManifest.FileName, upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+
+            // call step2 upload continue
+            var sessionId = upload.SessionId;
             var manifestDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
 
-            var tmpEntity = new TableEntityAdapter<UploadSession>(uploadSession, null, sessionId);
+            var tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
+            request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
 
-            // call upload end
-            var endResponse = (OkObjectResult)await End(endRequest,
+            response = (ObjectResult)await Continue(request,
                 sessionId,
-                $"{ DateTime.Now:u} Sample 2.pdf",
+                $"{DateTime.Now:u} Sample 1.pdf",
+                uploadDir,
+                uploadTmpTable,
+                tmpEntity,
+                _logger);
+
+            upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.NotNull(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.Null(upload.UploadEnd);
+            Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+
+            // call step3 upload end
+            tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
+            request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 2.pdf");
+
+            response = (ObjectResult)await End(request,
+                sessionId,
+                $"{DateTime.Now:u} Sample 2.pdf",
                 manifestDirectory,
                 uploadTmpTable,
                 tmpEntity,
@@ -138,9 +382,92 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 new App(),
                 _logger);
 
-            Assert.NotNull(endResponse.Value);
+            upload = response.Value.IsOrMap<UploadSession>();
 
-            _output.WriteLine(endResponse.Value.ToJson(Formatting.Indented));
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.NotNull(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.NotNull(upload.UploadEnd);
+            Assert.Contains("Sample 2.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+        }
+
+        [Fact]
+        public async void Should_Upload_Completed_With_Manifest_Last()
+        {
+            var request = TestFactory.CreateHttpRequestWithDataStream($"Data/Sample 2.pdf");
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+            var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
+            var queue = _app.Repository.GetQueue(QueueNames.CommProcess);
+
+            // call step1 upload start
+            var response = (ObjectResult)await Start(request,
+                $"{DateTime.Now:u} Sample 2.pdf",
+                uploadDir,
+                uploadTmpTable,
+                new IdGenerator(),
+                new App(),
+                _logger);
+
+            var upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.Null(upload.UploadEnd);
+            Assert.Contains("Sample 2.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+
+            // call step2 upload continue
+            var sessionId = upload.SessionId;
+            var manifestDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
+
+            var tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
+            request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
+
+            response = (ObjectResult)await Continue(request,
+                sessionId,
+                $"{DateTime.Now:u} Sample 1.pdf",
+                uploadDir,
+                uploadTmpTable,
+                tmpEntity,
+                _logger);
+
+            upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.Null(upload.UploadEnd);
+            Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
+
+            // call step3 upload end
+            tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
+            request = TestFactory.CreateHttpRequestWithDataStream($"Data/{CommunicationManifest.FileName}");
+
+            response = (ObjectResult)await End(request,
+                sessionId,
+                CommunicationManifest.FileName,
+                manifestDirectory,
+                uploadTmpTable,
+                tmpEntity,
+                queue,
+                new App(),
+                _logger);
+
+            upload = response.Value.IsOrMap<UploadSession>();
+
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.NotNull(upload.ManifestFile);
+            Assert.NotNull(upload.UploadStart);
+            Assert.NotNull(upload.UploadEnd);
+            Assert.Contains(CommunicationManifest.FileName, upload.LastUploadedFile);
+
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
         }
 
         /*
