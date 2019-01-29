@@ -205,7 +205,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             // call Azure Function
             var response = (ObjectResult)await Continue(request,
                 "test",
-                "",
+                null,
                 uploadDir,
                 uploadTmpTable,
                 tmpUploadEntity,
@@ -267,7 +267,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             // call Azure Function
             var response = (ObjectResult)await End(request,
                 "test",
-                "",
+                null,
                 uploadDir,
                 uploadTmpTable,
                 tmpUploadEntity,
@@ -345,7 +345,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             // call step2 upload continue
             var sessionId = upload.SessionId;
-            var manifestDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
+            var sessionBlobDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
 
             var tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
             request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
@@ -353,7 +353,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             response = (ObjectResult)await Continue(request,
                 sessionId,
                 $"{DateTime.Now:u} Sample 1.pdf",
-                uploadDir,
+                sessionBlobDirectory,
                 uploadTmpTable,
                 tmpEntity,
                 _logger);
@@ -375,7 +375,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             response = (ObjectResult)await End(request,
                 sessionId,
                 $"{DateTime.Now:u} Sample 2.pdf",
-                manifestDirectory,
+                sessionBlobDirectory,
                 uploadTmpTable,
                 tmpEntity,
                 queue,
@@ -422,7 +422,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
 
             // call step2 upload continue
             var sessionId = upload.SessionId;
-            var manifestDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
+            var sessionBlobDirectory = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory + $"/{sessionId}");
 
             var tmpEntity = new TableEntityAdapter<UploadSession>(upload, CommUploadPartitionKeys.Temp, sessionId);
             request = TestFactory.CreateHttpRequestWithDataStream("Data/Sample 1.pdf");
@@ -430,7 +430,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             response = (ObjectResult)await Continue(request,
                 sessionId,
                 $"{DateTime.Now:u} Sample 1.pdf",
-                uploadDir,
+                sessionBlobDirectory,
                 uploadTmpTable,
                 tmpEntity,
                 _logger);
@@ -452,7 +452,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             response = (ObjectResult)await End(request,
                 sessionId,
                 CommunicationManifest.FileName,
-                manifestDirectory,
+                sessionBlobDirectory,
                 uploadTmpTable,
                 tmpEntity,
                 queue,

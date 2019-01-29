@@ -17,6 +17,7 @@ using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.String;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
@@ -48,18 +49,18 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 {
                     SessionId = sessionId,
                     UploadStart = app.DateTimeNow,
-                    ManifestFile = uploadTo.Name.IsIfManifest(),
-                    LastUploadedFile = uploadTo.Name
+                    ManifestFile = filename.IsIfManifest(),
+                    LastUploadedFile = filename
                 };
 
-                await uploadSession.CreateIn(uploadTmpTable, CommUploadPartitionKeys.Temp, sessionId);
+                var result = await uploadSession.CreateIn(uploadTmpTable, CommUploadPartitionKeys.Temp, sessionId);
 
                 return new OkObjectResult(uploadSession);
             }
             catch (Exception ex)
             {
                 log.LogError(ex.StackTrace);
-                return new BadRequestObjectResult(new UploadSession { Errors = ex.Message});
+                return new BadRequestObjectResult(new UploadSession { Errors = ex.Message });
             }
         }
 
@@ -82,11 +83,10 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
                 var uploadTo = await req.Body.UploadTo(uploadDir, filename);
 
-                upload.OriginalEntity.ManifestFile =
-                    new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
-                upload.OriginalEntity.LastUploadedFile = uploadTo.Name;
+                upload.OriginalEntity.ManifestFile = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
+                upload.OriginalEntity.LastUploadedFile = filename;
 
-                await upload.Update(uploadTable);
+                var result = await upload.Update(uploadTable);
 
                 return new OkObjectResult(upload.OriginalEntity);
             }
@@ -135,12 +135,13 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 {
                     uploadSession.UploadEnd        = app.DateTimeNow;
                     uploadSession.ManifestFile     = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
-                    uploadSession.LastUploadedFile = uploadTo?.Name ?? uploadSession.LastUploadedFile;
+                    uploadSession.LastUploadedFile = new[] { filename, uploadSession.LastUploadedFile }.FirstOrDefault(f => f.IsNotNullOrEmpty());
                     return uploadSession;
                 }
 
                 // close the upload session
-                upload = await upload.MoveTo(uploadTable, uploadSession => CommUploadPartitionKeys.Completed
+                upload = await upload.MoveTo(uploadTable
+                    , uploadSession => CommUploadPartitionKeys.Completed
                     , updateOriginalEntity: UpdateOriginalEntity
                 );
 
