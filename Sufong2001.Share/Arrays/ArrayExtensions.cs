@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 
 namespace Sufong2001.Share.Arrays
 {
@@ -9,6 +10,12 @@ namespace Sufong2001.Share.Arrays
             return list.Where(a => a != null)
                 .SelectMany(a => a)
                 .ToArray();
+        }
+
+
+        public static int IndexOf<T>(this T[] list, T search)
+        {
+            return Array.IndexOf(list, search);
         }
     }
 }

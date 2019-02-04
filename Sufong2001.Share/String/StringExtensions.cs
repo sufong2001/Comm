@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 
 namespace Sufong2001.Share.String
 {
@@ -272,6 +273,28 @@ namespace Sufong2001.Share.String
             }
 
             return rt;
+        }
+
+        /// <summary>
+        /// return the fist element is not null or empty
+        /// </summary>
+        /// <param name="strings"></param>
+        /// <returns></returns>
+        public static string FirstIsNotEmpty(this string[] strings)
+        {
+            return strings.FirstOrDefault(f => f.IsNotNullOrEmpty());
+        }
+
+        /// <summary>
+        /// Return the first segment of the GUID.
+        /// e.g. 6dcfa1fd-6f18-4718-939c-aabbcd1b0425.
+        /// The 6dcfa1fd will be returned
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public static string GuidPrefix(this string guid)
+        {
+            return guid.Split('-').First();
         }
 
     }

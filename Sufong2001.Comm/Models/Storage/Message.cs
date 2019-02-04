@@ -1,20 +1,35 @@
-﻿using Sufong2001.Comm.Dto;
+﻿using System;
+using Sufong2001.Comm.Dto;
 
 namespace Sufong2001.Comm.Models.Storage
 {
     public class Message
     {
-        /// <summary>
-        /// The unique key of the message
-        /// </summary>
-        public string MessageReference { get; set; }
-
+ 
 
         public string SessionId { get; set; }
 
         public string CommunicationReference { get; set; }
 
         public string RecipientReference { get; set; }
+       
+        /// <summary>
+        /// The unique key of the message
+        /// </summary>
+        public string MessageReference { get; set; }
+
+        /// <summary>
+        /// Message delivery schedule
+        /// </summary>
+        public DateTime DeliverySchedule { get; set; }
+
+        public bool IsUrgent { get; set; }
+
+
+        public string FailoverOptions { get; set; }
+
+        public int DeliveryOrder { get; set; }
+
 
         public string Type { get; set; }
 

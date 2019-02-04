@@ -1,4 +1,4 @@
-﻿namespace Sufong2001.Comm.Models.Storage
+﻿namespace Sufong2001.Comm.Models.Storage.Partitions
 {
     public static class CommMessagePartitionKeys
     {

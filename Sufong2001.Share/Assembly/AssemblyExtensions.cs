@@ -21,5 +21,10 @@ namespace Sufong2001.Share.Assembly
 
             return values;
         }
+
+        public static object GetPropertyValue(this object obj, string propName)
+        {
+            return obj.GetType().GetProperty(propName)?.GetValue(obj, null);
+        }
     }
 }

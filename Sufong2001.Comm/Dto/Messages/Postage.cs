@@ -3,7 +3,7 @@ using Sufong2001.Share.Json;
 
 namespace Sufong2001.Comm.Dto.Messages
 {
-    public class Postage : IAttachments
+    public class Postage : IMessage, IAttachments
     {
         public string FirstName { get; set; }
 
@@ -18,5 +18,7 @@ namespace Sufong2001.Comm.Dto.Messages
         public ToAddress ToAddress() => new object[] { Address, this }.MergeTo<ToAddress>();
 
         public string[] PostalAddress() => ToAddress().ToLines();
+
+        public bool IsUrgent { get; set; }
     }
 }

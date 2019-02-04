@@ -15,6 +15,9 @@ namespace Sufong2001.Comm.Tests.Base
 
         public IdGenerator IdGenerator => new IdGenerator();
 
+        public App App => new App();
+
+
         public ApplicationBaseFixture()
         {
             var configurationBuilder = new ConfigurationBuilder()

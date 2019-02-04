@@ -1,4 +1,3 @@
-
 {
   "CommunicationReference": "CommunicationReference01",
   "Title": "Test Title",
@@ -34,10 +33,43 @@
           "Postage file1.pdf"
         ]
       },
+      "ScheduleTime": null,
+      "FailoverOptions": [
+        "Email",
+        "Sms",
+        "Postage"
+      ],
       "Attachments": [
         "Recipient file.pdf"
       ]
+    },
+    {
+      "RecipientReference": "RecipientReference02",
+      "Email": {
+        "EmailSubject": "EmailSubject02",
+        "EmailAddress": "EmailAddress02",
+        "EmailContent": "EmailContent02",
+        "Attachments": [
+          "Email2 file1.pdf"
+        ]
+      },
+      "Sms": {
+        "Mobile": "0430 000 212",
+        "SmsContent": "Sms02 Txt"
+      },
+      "Postage": null,
+      "ScheduleTime": null,
+      "FailoverOptions": null,
+      "Attachments": [
+        "Recipient2 file.pdf"
+      ]
     }
+  ],
+  "ScheduleTime": null,
+  "FailoverOptions": [
+    "Sms",
+    "Email",
+    "Postage"
   ],
   "Attachments": [
     "Common file.pdf"

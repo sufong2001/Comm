@@ -11,7 +11,6 @@ using Sufong2001.Share.IO;
 using Sufong2001.Share.Json;
 using System.Collections.Generic;
 using System.Linq;
-using Sufong2001.Comm.BusinessEntities;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -101,11 +100,46 @@ namespace Sufong2001.Comm.Tests
                             },
                         },
 
+                        FailoverOptions = new []
+                        {
+                            "Email","Sms", "Postage"
+                        },
                         Attachments = new[]
                         {
                             "Recipient file.pdf",
                         },
+                    },
+                    new Recipient()
+                    {
+                        RecipientReference = "RecipientReference02",
+
+                        Sms = new Sms()
+                        {
+                            Mobile = "0430 000 212",
+
+                            SmsContent = "Sms02 Txt",
+                        },
+                        Email = new Email()
+                        {
+                            EmailSubject = "EmailSubject02",
+                            EmailAddress = "EmailAddress02",
+                            EmailContent = "EmailContent02",
+                            Attachments = new[]
+                            {
+                                "Email2 file1.pdf",
+                            },
+                        },
+
+                        Attachments = new[]
+                        {
+                            "Recipient2 file.pdf",
+                        },
                     }
+                },
+
+                FailoverOptions = new[]
+                {
+                    "Sms","Email", "Postage"
                 },
                 Attachments = new[]
                 {
@@ -122,7 +156,7 @@ namespace Sufong2001.Comm.Tests
             var cm = $"Data/{CommunicationManifest.FileName}".ReadTo<CommunicationManifest>();
 
             var manifestKey = "test";
-            var entities = cm.PrepareCommMessage(manifestKey, _app.IdGenerator);
+            var entities = cm.PrepareCommMessage(manifestKey, _app.IdGenerator, _app.App.DateTimeNow);
 
             _output.WriteLine(entities.ToJson(Formatting.Indented));
         }

@@ -12,7 +12,7 @@ namespace Sufong2001.Comm.Configurations.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<IdGenerator>().SingleInstance().As<IUploadIdGenerator>().As<IMessageIdGenerator>();
+            builder.RegisterType<IdGenerator>().SingleInstance().As<IUploadIdGenerator>().As<IMessageIdGenerator>().As<IScheduleIdGenerator>();
             builder.RegisterType<App>().SingleInstance().AsSelf();
             //builder.RegisterType<Goodbyer>().Named<IGoodbyer>("Main");
             //builder.RegisterType<AlternateGoodbyer>().Named<IGoodbyer>("Secondary");

@@ -19,7 +19,16 @@ namespace Sufong2001.Comm.Workflows
 
             run = ServiceNames.ProcessStarter;
 
-            run = ServiceNames.Delivery;
+            run = ServiceNames.Scheduler;
+
+            run = ServiceNames.Dispatcher;
+
+            run = ServiceNames.DeliverySms;
+
+            run = ServiceNames.DeliveryEmail;
+
+            run = ServiceNames.DeliveryPostage;
+
 
         }
     }

@@ -19,6 +19,7 @@ using Sufong2001.Share.String;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Sufong2001.Comm.Models.Storage.Partitions;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
@@ -135,7 +136,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 {
                     uploadSession.UploadEnd        = app.DateTimeNow;
                     uploadSession.ManifestFile     = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
-                    uploadSession.LastUploadedFile = new[] { filename, uploadSession.LastUploadedFile }.FirstOrDefault(f => f.IsNotNullOrEmpty());
+                    uploadSession.LastUploadedFile = new[] { filename, uploadSession.LastUploadedFile     }.FirstIsNotEmpty();
                     return uploadSession;
                 }
 

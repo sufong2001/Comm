@@ -11,6 +11,7 @@ using Sufong2001.Comm.Tests.Base;
 using Sufong2001.Share.Json;
 using Sufong2001.Test.AzureFunctions;
 using System;
+using Sufong2001.Comm.Models.Storage.Partitions;
 using Xunit;
 using Xunit.Abstractions;
 using static Sufong2001.Comm.AzureFunctions.ServIns.UploadFunctions;

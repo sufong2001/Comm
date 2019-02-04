@@ -17,8 +17,8 @@ namespace Sufong2001.Comm.BusinessEntities
         }
 
         /// <summary>
-        /// return the one of the file name if it matches to CommunicationManifest.FileName.
-        /// The longer file name will have the highest match
+        /// return the first file name if it matches to CommunicationManifest.FileName.
+        /// The longer file name will have the highest priority
         /// </summary>
         /// <param name="fileNames"></param>
         /// <returns></returns>

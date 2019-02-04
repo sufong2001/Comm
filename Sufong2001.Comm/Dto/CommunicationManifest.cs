@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Sufong2001.Comm.Dto
 {
@@ -11,6 +12,10 @@ namespace Sufong2001.Comm.Dto
         public string Title { get; set; }
 
         public IEnumerable<Recipient> Recipients { get; set; }
+
+        public DateTime? ScheduleTime { get; set; }
+
+        public IEnumerable<string> FailoverOptions { get; set; }
 
         /// <summary>
         /// The list of the attachment file name for all the message which must be upload along with

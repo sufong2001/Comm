@@ -65,6 +65,28 @@ namespace Sufong2001.Share.AzureStorage
             return results;
         }
 
+
+        public static async Task<IList<TableResult>> DeleteIn(this IEnumerable<ITableEntity> entities, CloudTable cloudTable)
+        {
+            var batch = new TableBatchOperation();
+
+            ITableEntity BatchDelete(ITableEntity e)
+            {
+                if (e.ETag.IsNullOrEmpty()) return null;
+
+                batch.Delete(e);
+                return e;
+            }
+
+            var deleted = entities.Select(BatchDelete)
+                .Where(e => e != null)
+                .ToArray();
+
+            var results = await cloudTable.ExecuteBatchAsync(batch);
+
+            return results;
+        }
+
         public static T CloneTo<T>(this T entity, string partitionKey) where T : ITableEntity
         {
             var clone = entity.JClone<T>();
@@ -104,6 +126,32 @@ namespace Sufong2001.Share.AzureStorage
             return moveEntity;
         }
 
+        public static async Task<IEnumerable<TableEntityAdapter<T>>> MoveTo<T>(this IEnumerable<TableEntityAdapter<T>> records
+            , CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey = null, Func<T, T> updateOriginalEntity = null)
+        {
+            var moveEntities = records.Select(record =>
+                {
+                    var oe = record.OriginalEntity.JClone<T>();
+
+                    return new TableEntityAdapter<T>(
+                        updateOriginalEntity == null ? oe : updateOriginalEntity(oe)
+                        , partitionKey(oe)
+                        , rowKey == null ? record.RowKey : rowKey(oe)
+                    );
+                })
+                .ToArray();
+
+            var operations = new[]
+            {
+                records.DeleteIn(cloudTable),
+                moveEntities.CreateIn(cloudTable),
+            };
+
+            await Task.WhenAll(operations);
+
+            return moveEntities;
+        }
+
         /// <summary>
         /// Create the delete TableOperation for the specified TableEntity.
         /// If the ETag IsNullOrEmpty, the TableOperation will not be created and return null
@@ -128,6 +176,19 @@ namespace Sufong2001.Share.AzureStorage
         public static TableEntityAdapter<T> CreatTableEntity<T>(this T record, string partitionKey, string rowKey)
         {
             return new TableEntityAdapter<T>(record, partitionKey, rowKey);
+        }
+
+        public static IEnumerable<T> GetResult<T>(this IList<TableResult> results)
+        {
+            return results.Select(r =>
+            {
+                if (r.Result is TableEntityAdapter<T> a)
+                {
+                    return a.OriginalEntity.IsOrMap<T>();
+                }
+
+                return r.Result.IsOrMap<T>();
+            });
         }
     }
 }

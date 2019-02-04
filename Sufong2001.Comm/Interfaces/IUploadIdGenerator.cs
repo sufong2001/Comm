@@ -1,4 +1,6 @@
-﻿namespace Sufong2001.Comm.Interfaces
+﻿using System;
+
+namespace Sufong2001.Comm.Interfaces
 {
     public interface IUploadIdGenerator
     {
@@ -7,7 +9,11 @@
 
     public interface IMessageIdGenerator
     {
-        string MessageId();
+        string MessageId(string sessionId);
     }
 
+    public interface IScheduleIdGenerator
+    {
+        string ScheduleId(DateTime dateTime);
+    }
 }
