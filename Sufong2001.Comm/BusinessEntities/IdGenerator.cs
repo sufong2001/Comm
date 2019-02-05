@@ -19,9 +19,9 @@ namespace Sufong2001.Comm.BusinessEntities
             return prefix + "-" + Guid.NewGuid();
         }
 
-        public string ScheduleId(DateTime dateTime)
+        public string ScheduleId(DateTime dateTime, string separator)
         {
-            return dateTime.DateGuid();
+            return dateTime.DateGuid(separator);
         }
     }
 }

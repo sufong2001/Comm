@@ -71,11 +71,9 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             HttpRequest req,
             string session,
             string filename,
-            [Blob(BlobNames.UploadDirectory + "/{session}")]
-            CloudBlobDirectory uploadDir,
+            [Blob(BlobNames.UploadDirectory + "/{session}")]CloudBlobDirectory uploadDir,
+            [Table(TableNames.CommUpload, CommUploadPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
             [Table(TableNames.CommUpload)] CloudTable uploadTable,
-            [Table(TableNames.CommUpload, CommUploadPartitionKeys.Temp, "{session}")]
-            TableEntityAdapter<UploadSession> upload,
             ILogger log)
         {
             try
@@ -105,8 +103,8 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
             string session,
             string filename,
             [Blob(BlobNames.UploadDirectory + "/{session}")] CloudBlobDirectory uploadDir,
-            [Table(TableNames.CommUpload)] CloudTable uploadTable,
             [Table(TableNames.CommUpload, CommUploadPartitionKeys.Temp, "{session}")] TableEntityAdapter<UploadSession> upload,
+            [Table(TableNames.CommUpload)] CloudTable uploadTable,
             [Queue(QueueNames.CommProcess)] CloudQueue processQueue,
             [Inject] App app,
             ILogger log)

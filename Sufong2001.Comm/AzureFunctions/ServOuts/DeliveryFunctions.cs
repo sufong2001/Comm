@@ -11,6 +11,7 @@ using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Comm.Models.Storage.Partitions;
 using Sufong2001.Share.AzureStorage;
 using System.Threading.Tasks;
+using Sufong2001.Comm.Interfaces;
 
 namespace Sufong2001.Comm.AzureFunctions.ServOuts
 {
@@ -23,9 +24,10 @@ namespace Sufong2001.Comm.AzureFunctions.ServOuts
             [Table(TableNames.CommSchedule, CommSchedulePartitionKeys.InProgress, "{RowKey}")] TableEntityAdapter<MessageSchedule> schedule,
             [Table(TableNames.CommSchedule)] CloudTable scheduleTable,
             [Inject] App app,
+            [Inject] IScheduleIdGenerator idGenerator,
             ILogger log)
         {
-            await schedule.MarkScheduleSent(scheduleTable, app);
+            await schedule.MarkScheduleSent(scheduleTable, app, idGenerator);
         }
 
         [FunctionName(ServiceNames.DeliveryEmail)]
@@ -34,9 +36,10 @@ namespace Sufong2001.Comm.AzureFunctions.ServOuts
             [Table(TableNames.CommSchedule, CommSchedulePartitionKeys.InProgress, "{RowKey}")] TableEntityAdapter<MessageSchedule> schedule,
             [Table(TableNames.CommSchedule)] CloudTable scheduleTable,
             [Inject] App app,
+            [Inject] IScheduleIdGenerator idGenerator,
             ILogger log)
         {
-            await schedule.MarkScheduleSent(scheduleTable, app);
+            await schedule.MarkScheduleSent(scheduleTable, app, idGenerator);
         }
 
         [FunctionName(ServiceNames.DeliveryPostage)]
@@ -45,22 +48,25 @@ namespace Sufong2001.Comm.AzureFunctions.ServOuts
             [Table(TableNames.CommSchedule, CommSchedulePartitionKeys.InProgress, "{RowKey}")] TableEntityAdapter<MessageSchedule> schedule,
             [Table(TableNames.CommSchedule)] CloudTable scheduleTable,
             [Inject] App app,
+            [Inject] IScheduleIdGenerator idGenerator,
             ILogger log)
         {
-            await schedule.MarkScheduleSent(scheduleTable, app);
+            await schedule.MarkScheduleSent(scheduleTable, app, idGenerator);
         }
 
-        private static async Task MarkScheduleSent(this TableEntityAdapter<MessageSchedule> schedule, CloudTable scheduleTable, App app)
+        private static async Task MarkScheduleSent(this TableEntityAdapter<MessageSchedule> schedule, CloudTable scheduleTable, App app, IScheduleIdGenerator id)
         {
+            var timestamp = app.DateTimeNow;
             MessageSchedule UpdateOriginalEntity(MessageSchedule messageSchedule)
             {
-                messageSchedule.Delivered = app.DateTimeNow;
+                messageSchedule.Delivered = timestamp;
                 return messageSchedule;
             }
 
             await schedule.MoveTo(scheduleTable
                 , s => CommSchedulePartitionKeys.Sent
-                , updateOriginalEntity: UpdateOriginalEntity
+                , s => id.ScheduleId(timestamp)
+                , UpdateOriginalEntity
             );
         }
     }

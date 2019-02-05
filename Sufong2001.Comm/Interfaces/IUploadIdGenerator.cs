@@ -14,6 +14,6 @@ namespace Sufong2001.Comm.Interfaces
 
     public interface IScheduleIdGenerator
     {
-        string ScheduleId(DateTime dateTime);
+        string ScheduleId(DateTime dateTime, string separator = " ");
     }
 }

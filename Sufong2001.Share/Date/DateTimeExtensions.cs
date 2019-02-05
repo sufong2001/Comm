@@ -9,10 +9,11 @@ namespace Sufong2001.Share.Date
         /// Return a GUID with yyyyMMdd prefix.
         /// </summary>
         /// <param name="dateTime"></param>
+        /// <param name="separator"></param>
         /// <returns></returns>
-        public static string DateGuid(this DateTime dateTime)
+        public static string DateGuid(this DateTime dateTime, string separator)
         {
-            return dateTime.ToUniversalTime().ToString("yyyyMMdd") + "-" + Guid.NewGuid();
+            return dateTime.ToUniversalTime().ToString("yyyyMMdd") + separator + Guid.NewGuid();
         }
     }
 }

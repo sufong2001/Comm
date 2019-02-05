@@ -150,8 +150,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 $"{DateTime.Now:u} Sample 1.pdf",
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 _logger);
 
             var upload = response.Value.IsOrMap<UploadSession>();
@@ -179,8 +179,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 $"{DateTime.Now:u} Sample 1.pdf",
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 _logger);
 
             var upload = response.Value.IsOrMap<UploadSession>();
@@ -208,8 +208,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 null,
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 _logger);
 
             var upload = response.Value.IsOrMap<UploadSession>();
@@ -238,8 +238,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 $"{DateTime.Now:u} Sample 2.pdf",
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 queue,
                 new App(),
                 _logger);
@@ -270,8 +270,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 null,
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 queue,
                 new App(),
                 _logger);
@@ -302,8 +302,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 "test",
                 $"{DateTime.Now:u} Sample 2.pdf",
                 uploadDir,
-                uploadTmpTable,
                 tmpUploadEntity,
+                uploadTmpTable,
                 queue,
                 new App(),
                 _logger);
@@ -355,8 +355,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 sessionId,
                 $"{DateTime.Now:u} Sample 1.pdf",
                 sessionBlobDirectory,
-                uploadTmpTable,
                 tmpEntity,
+                uploadTmpTable,
                 _logger);
 
             upload = response.Value.IsOrMap<UploadSession>();
@@ -377,8 +377,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 sessionId,
                 $"{DateTime.Now:u} Sample 2.pdf",
                 sessionBlobDirectory,
-                uploadTmpTable,
                 tmpEntity,
+                uploadTmpTable,
                 queue,
                 new App(),
                 _logger);
@@ -432,8 +432,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 sessionId,
                 $"{DateTime.Now:u} Sample 1.pdf",
                 sessionBlobDirectory,
-                uploadTmpTable,
                 tmpEntity,
+                uploadTmpTable,
                 _logger);
 
             upload = response.Value.IsOrMap<UploadSession>();
@@ -454,8 +454,8 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 sessionId,
                 CommunicationManifest.FileName,
                 sessionBlobDirectory,
-                uploadTmpTable,
                 tmpEntity,
+                uploadTmpTable,
                 queue,
                 new App(),
                 _logger);

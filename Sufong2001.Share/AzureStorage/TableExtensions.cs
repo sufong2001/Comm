@@ -4,13 +4,15 @@ using Sufong2001.Share.String;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace Sufong2001.Share.AzureStorage
 {
     public static class TableExtensions
     {
-        public static async Task<TableResult> CreateIn<T>(this T record, CloudTable cloudTable, string partitionKey, string rowKey)
+        public static async Task<TableResult> CreateIn<T>(this T record, CloudTable cloudTable, string partitionKey,
+            string rowKey)
         {
             var entity = record.CreatTableEntity(partitionKey, rowKey);
 
@@ -37,7 +39,8 @@ namespace Sufong2001.Share.AzureStorage
             return result;
         }
 
-        public static async Task<IList<TableResult>> CreateIn<T>(this IEnumerable<T> records, CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey)
+        public static async Task<IList<TableResult>> CreateIn<T>(this IEnumerable<T> records, CloudTable cloudTable,
+            Func<T, string> partitionKey, Func<T, string> rowKey)
         {
             var entities = records
                 .Select(e => e.CreatTableEntity(partitionKey(e), rowKey(e)))
@@ -48,7 +51,8 @@ namespace Sufong2001.Share.AzureStorage
             return results;
         }
 
-        public static async Task<IList<TableResult>> CreateIn(this IEnumerable<ITableEntity> entities, CloudTable cloudTable)
+        public static async Task<IList<TableResult>> CreateIn(this IEnumerable<ITableEntity> entities,
+            CloudTable cloudTable)
         {
             var batch = new TableBatchOperation();
 
@@ -66,7 +70,8 @@ namespace Sufong2001.Share.AzureStorage
         }
 
 
-        public static async Task<IList<TableResult>> DeleteIn(this IEnumerable<ITableEntity> entities, CloudTable cloudTable)
+        public static async Task<IList<TableResult>> DeleteIn(this IEnumerable<ITableEntity> entities,
+            CloudTable cloudTable)
         {
             var batch = new TableBatchOperation();
 
@@ -97,7 +102,8 @@ namespace Sufong2001.Share.AzureStorage
         }
 
         public static async Task<TableEntityAdapter<T>> MoveTo<T>(this TableEntityAdapter<T> record
-            , CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey = null, Func<T, T> updateOriginalEntity = null)
+            , CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey = null,
+            Func<T, T> updateOriginalEntity = null)
         {
             // update the OriginalEntity.Property value has cause some funny error without cloning the object
             // System.Private.CoreLib: Exception while executing function: TransferEnd.
@@ -126,8 +132,10 @@ namespace Sufong2001.Share.AzureStorage
             return moveEntity;
         }
 
-        public static async Task<IEnumerable<TableEntityAdapter<T>>> MoveTo<T>(this IEnumerable<TableEntityAdapter<T>> records
-            , CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey = null, Func<T, T> updateOriginalEntity = null)
+        public static async Task<IEnumerable<TableEntityAdapter<T>>> MoveTo<T>(
+            this IEnumerable<TableEntityAdapter<T>> records
+            , CloudTable cloudTable, Func<T, string> partitionKey, Func<T, string> rowKey = null,
+            Func<T, T> updateOriginalEntity = null)
         {
             var moveEntities = records.Select(record =>
                 {
@@ -152,6 +160,19 @@ namespace Sufong2001.Share.AzureStorage
             return moveEntities;
         }
 
+        public static async Task<TableQuerySegment<TableEntityAdapter<T>>> GetFirstSegmentOf<T>(this CloudTable cloudTable,string partitionKey, string rowKeyEnd)
+        {
+            var continuationToken = new TableContinuationToken();
+
+            var query = TableHelperExtensions.CreateTopRangeQuery<T>(partitionKey, rowKeyEnd);
+            var results = await cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken);
+
+            return results;
+        }
+    }
+    public static class TableHelperExtensions
+    {
+
         /// <summary>
         /// Create the delete TableOperation for the specified TableEntity.
         /// If the ETag IsNullOrEmpty, the TableOperation will not be created and return null
@@ -171,6 +192,21 @@ namespace Sufong2001.Share.AzureStorage
         public static TableOperation CreateOperationInsertOrReplace(this ITableEntity entity)
         {
             return TableOperation.InsertOrReplace(entity);
+        }
+
+
+        public static TableQuery<TableEntityAdapter<T>> CreateTopRangeQuery<T>(string partitionKey, string rowKeyEnd) 
+        {
+            // Create the table query.
+            var rangeQuery = new TableQuery<TableEntityAdapter<T>>().Where(
+                    TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey),
+                        TableOperators.And,
+                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, rowKeyEnd)
+                    )
+                );
+
+            return rangeQuery;
         }
 
         public static TableEntityAdapter<T> CreatTableEntity<T>(this T record, string partitionKey, string rowKey)

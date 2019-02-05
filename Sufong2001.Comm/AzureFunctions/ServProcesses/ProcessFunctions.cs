@@ -33,38 +33,49 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
                 $"Started an orchestration {orchestrationId} for uploaded manifest {uploadCompleted.SessionId}");
         }
 
+        /// <summary>
+        /// 1. Get the first segment of the scheduled messages.
+        /// 2. mark they as in progress
+        /// 3. push to send queue
+        /// </summary>
+        /// <param name="timer"></param>
+        /// <param name="scheduleTable"></param>
+        /// <param name="sendQueue"></param>
+        /// <param name="idGenerator"></param>
+        /// <param name="app"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
         [FunctionName(ServiceNames.Scheduler)]
         public static async Task Scheduler(
             [TimerTrigger("0 */1 * * * *")] TimerInfo timer, // every minutes
             [Table(TableNames.CommSchedule)] CloudTable scheduleTable,
             [Queue(QueueNames.CommSend)] CloudQueue sendQueue,
-            [Inject] IMessageIdGenerator idGenerator,
+            [Inject] IScheduleIdGenerator idGenerator,
             [Inject] App app,
             ILogger log)
         {
-            var rowRange = timer.ScheduleStatus.Last.ToString("yyyyMMdd0");
-            var continuationToken = new TableContinuationToken();
+            var timestamp = timer.ScheduleStatus.Last;
+            var rowRange = timestamp.ToString("yyyyMMdd<");
 
-            // Create the table query.
-            TableQuery<TableEntityAdapter<MessageSchedule>> rangeQuery =
-                new TableQuery<TableEntityAdapter<MessageSchedule>>().Where(
-                    TableQuery.CombineFilters(
-                        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, CommSchedulePartitionKeys.Scheduled),
-                        TableOperators.And,
-                        TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.LessThan, rowRange)
-                    )
-                );
-
-            var exec = await scheduleTable.ExecuteQuerySegmentedAsync(rangeQuery, continuationToken);
+            // 1. Get the first segment of the scheduled messages.
+            var exec = await scheduleTable.GetFirstSegmentOf<MessageSchedule>(CommSchedulePartitionKeys.Scheduled, rowRange);
 
             if (exec.Results.Count == 0) return;
 
             var schedules = exec.Results;
 
-            // TODO: do additional the schedule filter here
+            // TODO: can do additional schedule filter here if it is required
+            // var delayed = await schedules.MoveTo(scheduleTable
+            //         , s => CommSchedulePartitionKeys.Scheduled
+            //         , s => idGenerator.ScheduleId(timestamp, "!")
+            //     );
+            //  
+            // return;
 
+            // 2. mark they as in progress
             var results = await schedules.MoveTo(scheduleTable, schedule => CommSchedulePartitionKeys.InProgress);
 
+            // 3. push to send queue
             var queue = results.Select(e =>
             {
                 var dispatch = e.OriginalEntity.IsOrMap<MessageDispatch>();
@@ -76,7 +87,8 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
         }
 
         /// <summary>
-        /// Redistribute the sending message to separated type message queue
+        /// Redistribute the sending message to associated type message queue accordingly.
+        /// This act as a shortcut to dispatch message send out to different queue by the type. Such as sms, email and postage
         /// </summary>
         /// <param name="dispatch"></param>
         /// <param name="deliveryQueue"></param>
