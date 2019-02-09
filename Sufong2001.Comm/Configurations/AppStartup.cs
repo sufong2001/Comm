@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sufong2001.Comm.AzureStorage;
 using Sufong2001.Comm.Configurations;
 using System;
+using Sufong2001.Comm.AzureStorage.Interfaces;
 
 [assembly: WebJobsStartup(typeof(AppStartup))]
 
@@ -27,7 +28,9 @@ namespace Sufong2001.Comm.Configurations
 
                     var storageAccount = builder.Services.BuildServiceProvider().GetService<StorageAccountProvider>().GetHost();
                     var repository = new CommRepository(storageAccount);
-                    cfg.RegisterInstance(repository);
+                    repository.CreateStorageIfNotExists().ConfigureAwait(false);
+
+                    cfg.Register(context => repository).SingleInstance().As<ICommRepository>();
                 },
                 Name
             );

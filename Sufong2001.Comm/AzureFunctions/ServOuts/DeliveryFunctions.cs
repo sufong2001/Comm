@@ -6,12 +6,12 @@ using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
 using Sufong2001.Comm.Configurations.Resolvers;
+using Sufong2001.Comm.Interfaces;
 using Sufong2001.Comm.Models.Events;
 using Sufong2001.Comm.Models.Storage;
 using Sufong2001.Comm.Models.Storage.Partitions;
 using Sufong2001.Share.AzureStorage;
 using System.Threading.Tasks;
-using Sufong2001.Comm.Interfaces;
 
 namespace Sufong2001.Comm.AzureFunctions.ServOuts
 {

@@ -2,6 +2,7 @@
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using Sufong2001.Comm.AzureStorage.Interfaces;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureStorage
 {
-    public class CommRepository
+    public class CommRepository : ICommRepository, IQueueRepository, ITableRepository, IBlobRepository
     {
         public Guid Guid = Guid.NewGuid();
 
