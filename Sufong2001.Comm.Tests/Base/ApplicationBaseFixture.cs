@@ -1,10 +1,11 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sufong2001.Comm.AzureStorage;
+using Sufong2001.Comm.BusinessEntities;
 using System;
 using System.IO;
 using System.Net.Http.Headers;
-using Sufong2001.Comm.AzureStorage;
-using Sufong2001.Comm.BusinessEntities;
 
 namespace Sufong2001.Comm.Tests.Base
 {
@@ -15,8 +16,7 @@ namespace Sufong2001.Comm.Tests.Base
 
         public IdGenerator IdGenerator => new IdGenerator();
 
-        public App App => new App();
-
+        public App App { get; }
 
         public ApplicationBaseFixture()
         {
@@ -24,11 +24,10 @@ namespace Sufong2001.Comm.Tests.Base
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true);
 
-
             Configuration = configurationBuilder.Build();
 
-
-            Repository = new CommRepository(Configuration["Values:AzureWebJobsStorage"]);
+            Repository = new CommRepository(StorageAccount.NewFromConnectionString(Configuration["Values:AzureWebJobsStorage"]));
+            App = new App(Repository);
         }
 
         public void ConfigureServices(IServiceCollection services)

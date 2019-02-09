@@ -1,10 +1,11 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using Microsoft.Azure.WebJobs;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,19 +13,19 @@ namespace Sufong2001.Comm.AzureStorage
 {
     public class CommRepository
     {
+        public Guid Guid = Guid.NewGuid();
+
         private readonly CloudBlobClient _blobClient;
         private readonly CloudTableClient _cloudTableClient;
         private readonly CloudQueueClient _cloudQueueClient;
 
-        public CommRepository(string connectionString)
+        public CommRepository(StorageAccount storageAccount)
         {
-            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+            _blobClient = storageAccount.CreateCloudBlobClient();
 
-            _blobClient = cloudStorageAccount.CreateCloudBlobClient();
+            _cloudTableClient = storageAccount.CreateCloudTableClient();
 
-            _cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-
-            _cloudQueueClient = cloudStorageAccount.CreateCloudQueueClient();
+            _cloudQueueClient = storageAccount.CreateCloudQueueClient();
         }
 
         public async Task<bool[]> CreateStorageIfNotExists()

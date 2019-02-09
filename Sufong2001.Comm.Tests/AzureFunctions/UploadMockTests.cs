@@ -56,7 +56,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
                 cloudBlobDirectory.Object,
                 cloudTable.Object,
                 new IdGenerator(),
-                new App(),
+                _app.App,
                 _logger);
 
             Assert.NotNull(response.Value);

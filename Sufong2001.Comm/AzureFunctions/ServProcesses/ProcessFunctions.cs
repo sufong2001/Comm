@@ -44,6 +44,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
         /// <param name="idGenerator"></param>
         /// <param name="app"></param>
         /// <param name="log"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
         [FunctionName(ServiceNames.Scheduler)]
         public static async Task Scheduler(
@@ -52,7 +53,9 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
             [Queue(QueueNames.CommSend)] CloudQueue sendQueue,
             [Inject] IScheduleIdGenerator idGenerator,
             [Inject] App app,
-            ILogger log)
+            ILogger log,
+            ExecutionContext context
+            )
         {
             var timestamp = timer.ScheduleStatus.Last;
             var rowRange = timestamp.ToString("yyyyMMdd<");
