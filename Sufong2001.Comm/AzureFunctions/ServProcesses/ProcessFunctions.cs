@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureFunctions.ServProcesses
 {
-    [DependencyInjectionConfig(typeof(DiConfig))]
+    [DependencyInjectionConfig(typeof(CommConfig))]
     public static class ProcessFunctions
     {
         [FunctionName(ServiceNames.ProcessStarter)]

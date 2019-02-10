@@ -23,7 +23,7 @@ using Sufong2001.Comm.Models.Storage.Partitions;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
-    [DependencyInjectionConfig(typeof(DiConfig))]
+    [DependencyInjectionConfig(typeof(CommConfig))]
     public static class UploadFunctions
     {
         [FunctionName(ServiceNames.UploadStart)]

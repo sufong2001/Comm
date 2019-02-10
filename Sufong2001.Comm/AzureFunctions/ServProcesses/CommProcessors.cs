@@ -23,7 +23,7 @@ using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Sufong2001.Comm.AzureFunctions.ServProcesses
 {
-    [DependencyInjectionConfig(typeof(DiConfig))]
+    [DependencyInjectionConfig(typeof(CommConfig))]
     public static class CommProcessors
     {
         [FunctionName(OrchestratorNames.ProcessMessage)]

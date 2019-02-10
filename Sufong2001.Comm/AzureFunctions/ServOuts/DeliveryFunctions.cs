@@ -18,7 +18,7 @@ using System.Threading.Tasks;
 
 namespace Sufong2001.Comm.AzureFunctions.ServOuts
 {
-    [DependencyInjectionConfig(typeof(DiConfig))]
+    [DependencyInjectionConfig(typeof(CommConfig))]
     public static class DeliveryFunctions
     {
         [FunctionName(ServiceNames.DeliverySms)]
