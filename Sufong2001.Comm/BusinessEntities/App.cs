@@ -1,6 +1,5 @@
-﻿using Sufong2001.Comm.AzureStorage;
+﻿using Sufong2001.Comm.AzureStorage.Interfaces;
 using System;
-using Sufong2001.Comm.AzureStorage.Interfaces;
 
 namespace Sufong2001.Comm.BusinessEntities
 {

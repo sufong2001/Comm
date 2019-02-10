@@ -34,13 +34,10 @@ namespace Sufong2001.Comm.Tests
 
             CloudBlockBlob uploadTo = null;
 
-            if (results.Any(r => r))
-            {
-                var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
+            var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
 
-                uploadTo = await $"Data/{CommunicationManifest.FileName}".CreateStream()
-                    .UploadTo(uploadDir, $"test/{CommunicationManifest.FileName}");
-            }
+            uploadTo = await $"Data/{CommunicationManifest.FileName}".CreateStream()
+                .UploadTo(uploadDir, $"test/{CommunicationManifest.FileName}");
 
             _output.WriteLine(new
             {

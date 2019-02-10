@@ -6,6 +6,8 @@ namespace Sufong2001.Comm.Models.Events
     {
         public string RowKey { get; set; }
 
+        public string MessageReference { get; set; }
+
         public string Type { get; set; }
 
         public string QueueName => $"{QueueNames.CommSend}-{Type.ToLower()}";

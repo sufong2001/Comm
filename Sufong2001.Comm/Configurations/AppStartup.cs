@@ -30,7 +30,7 @@ namespace Sufong2001.Comm.Configurations
                     var repository = new CommRepository(storageAccount);
                     repository.CreateStorageIfNotExists().ConfigureAwait(false);
 
-                    cfg.Register(context => repository).SingleInstance().As<ICommRepository>();
+                    cfg.Register(context => repository);
                 },
                 Name
             );
