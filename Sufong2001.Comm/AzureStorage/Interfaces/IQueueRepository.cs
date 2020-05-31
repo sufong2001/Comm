@@ -1,4 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Queue;
+﻿using Microsoft.Azure.Storage.Queue;
 
 namespace Sufong2001.Comm.AzureStorage.Interfaces
 {

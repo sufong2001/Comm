@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions.Internal;
 
 namespace Sufong2001.Test.Logging
 {
@@ -9,9 +9,9 @@ namespace Sufong2001.Test.Logging
     {
         public IList<string> Logs;
 
-        public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
+        public IDisposable BeginScope<TState>(TState state) => NullLogger.Instance.BeginScope(state);
 
-        public bool IsEnabled(LogLevel logLevel) => false;
+        public bool IsEnabled(LogLevel logLevel) => NullLogger.Instance.IsEnabled(logLevel);
 
         public ListLogger()
         {

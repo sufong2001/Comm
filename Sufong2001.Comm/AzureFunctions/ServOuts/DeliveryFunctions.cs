@@ -1,7 +1,7 @@
 using AzureFunctions.Autofac;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;

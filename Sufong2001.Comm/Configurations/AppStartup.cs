@@ -26,7 +26,8 @@ namespace Sufong2001.Comm.Configurations
                 {
                     cfg.Populate(builder.Services);
 
-                    var storageAccount = builder.Services.BuildServiceProvider().GetService<StorageAccountProvider>().GetHost();
+                    var serviceProvider = builder.Services.BuildServiceProvider();
+                    var storageAccount = serviceProvider.GetService<StorageAccountProvider>().GetHost();
                     var repository = new CommRepository(storageAccount);
                     repository.CreateStorageIfNotExists().ConfigureAwait(false);
 

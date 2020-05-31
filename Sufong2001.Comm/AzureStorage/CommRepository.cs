@@ -1,14 +1,14 @@
-﻿using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
-using Sufong2001.Comm.AzureStorage.Interfaces;
+﻿using Sufong2001.Comm.AzureStorage.Interfaces;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.WebJobs;
 
 namespace Sufong2001.Comm.AzureStorage
 {

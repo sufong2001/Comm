@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Table;
 using Moq;
 using Sufong2001.Comm.AzureFunctions.ServIns;
 using Sufong2001.Comm.BusinessEntities;
@@ -13,6 +10,8 @@ using Sufong2001.Test.AzureFunctions;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Blob;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Abstractions;

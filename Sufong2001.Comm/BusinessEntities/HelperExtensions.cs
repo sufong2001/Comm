@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.WebJobs;
-using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Comm.AzureStorage.Interfaces;
 using Sufong2001.Comm.Dto;
 using Sufong2001.Comm.Models.Events;
@@ -10,6 +9,7 @@ using Sufong2001.Share.String;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Sufong2001.Comm.BusinessEntities
 {

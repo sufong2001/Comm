@@ -1,4 +1,4 @@
-using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Moq;
 using Newtonsoft.Json;
 using Sufong2001.Comm.AzureFunctions.Names;
@@ -45,7 +45,7 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var messageTable = _app.Repository.GetTable(TableNames.CommMessage);
             var scheduleTable = _app.Repository.GetTable(TableNames.CommSchedule);
 
-            var durableOrchestrationContextBase = new Mock<DurableOrchestrationContextBase>();
+            var durableOrchestrationContextBase = new Mock<IDurableOrchestrationContext>();
             durableOrchestrationContextBase
                 .Setup(x => x.GetInput<UploadCompleted>()).Returns(uploadCompleted);
 

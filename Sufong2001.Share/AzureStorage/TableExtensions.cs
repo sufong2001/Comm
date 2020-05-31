@@ -1,10 +1,9 @@
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using Sufong2001.Share.Json;
 using Sufong2001.Share.String;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace Sufong2001.Share.AzureStorage
@@ -68,7 +67,6 @@ namespace Sufong2001.Share.AzureStorage
 
             return results;
         }
-
 
         public static async Task<IList<TableResult>> DeleteIn(this IEnumerable<ITableEntity> entities,
             CloudTable cloudTable)
@@ -160,7 +158,7 @@ namespace Sufong2001.Share.AzureStorage
             return moveEntities;
         }
 
-        public static async Task<TableQuerySegment<TableEntityAdapter<T>>> GetFirstSegmentOf<T>(this CloudTable cloudTable,string partitionKey, string rowKeyEnd)
+        public static async Task<TableQuerySegment<TableEntityAdapter<T>>> GetFirstSegmentOf<T>(this CloudTable cloudTable, string partitionKey, string rowKeyEnd)
         {
             var continuationToken = new TableContinuationToken();
 
@@ -170,9 +168,9 @@ namespace Sufong2001.Share.AzureStorage
             return results;
         }
     }
+
     public static class TableHelperExtensions
     {
-
         /// <summary>
         /// Create the delete TableOperation for the specified TableEntity.
         /// If the ETag IsNullOrEmpty, the TableOperation will not be created and return null
@@ -194,8 +192,7 @@ namespace Sufong2001.Share.AzureStorage
             return TableOperation.InsertOrReplace(entity);
         }
 
-
-        public static TableQuery<TableEntityAdapter<T>> CreateTopRangeQuery<T>(string partitionKey, string rowKeyEnd) 
+        public static TableQuery<TableEntityAdapter<T>> CreateTopRangeQuery<T>(string partitionKey, string rowKeyEnd)
         {
             // Create the table query.
             var rangeQuery = new TableQuery<TableEntityAdapter<T>>().Where(

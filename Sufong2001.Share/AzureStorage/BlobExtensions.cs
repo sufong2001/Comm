@@ -1,4 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿using Microsoft.Azure.Storage.Blob;
 using Sufong2001.Share.String;
 using System;
 using System.IO;
@@ -13,7 +13,7 @@ namespace Sufong2001.Share.AzureStorage
         {
             if (filename.IsNullOrEmpty()) return null;
 
-            if (stream == null || stream.Length == 0) throw new ArgumentException("No file data has been uploaded", nameof(stream));
+            if (stream == null || stream.Length == 0) throw new ArgumentException("No file data has been uploaded.", nameof(stream));
 
             var cloudBlockBlob = directory.GetBlockBlobReference(filename);
 

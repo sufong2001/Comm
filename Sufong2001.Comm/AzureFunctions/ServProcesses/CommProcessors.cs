@@ -1,8 +1,6 @@
 ﻿using AzureFunctions.Autofac;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage;
@@ -19,7 +17,10 @@ using Sufong2001.Share.Json;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Blob;
 
 namespace Sufong2001.Comm.AzureFunctions.ServProcesses
 {
@@ -28,7 +29,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
     {
         [FunctionName(OrchestratorNames.ProcessMessage)]
         public static async Task<IEnumerable<MessageSchedule>> ProcessMessageOrchestrator(
-            [OrchestrationTrigger] DurableOrchestrationContextBase ctx,
+            [OrchestrationTrigger] IDurableOrchestrationContext ctx,
             ILogger log)
         {
             var uploadCompleted = ctx.GetInput<UploadCompleted>();

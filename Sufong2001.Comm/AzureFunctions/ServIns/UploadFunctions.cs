@@ -4,9 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
 using Sufong2001.Comm.AzureFunctions.Names;
 using Sufong2001.Comm.AzureStorage.Names;
 using Sufong2001.Comm.BusinessEntities;
@@ -14,12 +11,16 @@ using Sufong2001.Comm.Configurations.Resolvers;
 using Sufong2001.Comm.Interfaces;
 using Sufong2001.Comm.Models.Events;
 using Sufong2001.Comm.Models.Storage;
+using Sufong2001.Comm.Models.Storage.Partitions;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.String;
 using System;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using Sufong2001.Comm.Models.Storage.Partitions;
+using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.Queue;
 
 namespace Sufong2001.Comm.AzureFunctions.ServIns
 {
@@ -44,7 +45,16 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
                 if (filename.IsNullOrEmpty()) throw new ArgumentException("A filename is required.", nameof(filename));
 
-                var uploadTo = await req.Body.UploadTo(uploadDir, $"{sessionId}/{filename}");
+
+                //var provider = new MultipartMemoryStreamProvider();
+                //var uploadTo = req.Content.ReadAsMultipartAsync(provider);// .Body.UploadTo(uploadDir, $"{sessionId}/{filename}");
+
+                //var contents = uploadTo.Result.Contents;
+
+                //await contents.First().ReadAsStreamAsync().Result.UploadTo(uploadDir, $"{sessionId}/{filename}");
+
+
+                await req.Body.UploadTo(uploadDir, $"{sessionId}/{filename}");
 
                 var uploadSession = new UploadSession
                 {
@@ -132,9 +142,9 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
 
                 UploadSession UpdateOriginalEntity(UploadSession uploadSession)
                 {
-                    uploadSession.UploadEnd        = app.DateTimeNow;
-                    uploadSession.ManifestFile     = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
-                    uploadSession.LastUploadedFile = new[] { filename, uploadSession.LastUploadedFile     }.FirstIsNotEmpty();
+                    uploadSession.UploadEnd = app.DateTimeNow;
+                    uploadSession.ManifestFile = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
+                    uploadSession.LastUploadedFile = new[] { filename, uploadSession.LastUploadedFile }.FirstIsNotEmpty();
                     return uploadSession;
                 }
 

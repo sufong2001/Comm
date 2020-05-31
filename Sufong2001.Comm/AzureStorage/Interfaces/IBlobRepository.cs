@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage.Blob;
+﻿
+using Microsoft.Azure.Storage.Blob;
 
 namespace Sufong2001.Comm.AzureStorage.Interfaces
 {

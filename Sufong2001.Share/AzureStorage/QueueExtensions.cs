@@ -1,6 +1,7 @@
-﻿using Microsoft.WindowsAzure.Storage.Queue;
+﻿
 using Sufong2001.Share.Json;
 using System.Threading.Tasks;
+using Microsoft.Azure.Storage.Queue;
 
 namespace Sufong2001.Share.AzureStorage
 {

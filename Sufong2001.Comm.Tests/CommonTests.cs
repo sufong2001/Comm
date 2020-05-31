@@ -1,4 +1,3 @@
-using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 using Sufong2001.Comm.AzureStorage;
 using Sufong2001.Comm.AzureStorage.Names;
@@ -11,6 +10,7 @@ using Sufong2001.Share.IO;
 using Sufong2001.Share.Json;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Azure.Storage.Blob;
 using Xunit;
 using Xunit.Abstractions;
 
