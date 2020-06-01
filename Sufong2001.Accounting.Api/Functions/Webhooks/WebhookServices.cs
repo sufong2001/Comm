@@ -3,19 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Sufong2001.Accounting.Api.Webhooks.Names;
+using Sufong2001.Accounting.Api.Functions.Webhooks.Names;
 using Sufong2001.Accounting.Xero.Webhooks;
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Sufong2001.Accounting.Api.Webhooks
+namespace Sufong2001.Accounting.Api.Functions.Webhooks
 {
     public class WebhookServices
-
     {
-        //private readonly HttpClient _client;
         private readonly ISignatureVerifier _signatureVerifier;
 
         public WebhookServices(ISignatureVerifier signatureVerifier)

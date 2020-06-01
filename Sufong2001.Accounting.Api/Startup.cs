@@ -1,10 +1,17 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+﻿using Autofac;
+using Autofac.Extensions.DependencyInjection.AzureFunctions;
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sufong2001.Accounting.Api;
+using Sufong2001.Accounting.Api.Functions;
+using Sufong2001.Accounting.Xero;
+using Sufong2001.Accounting.Xero.Storage;
 using Sufong2001.Accounting.Xero.Webhooks;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
+using Xero.NetStandard.OAuth2.Client;
+using Xero.NetStandard.OAuth2.Config;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -17,21 +24,66 @@ namespace Sufong2001.Accounting.Api
     {
         public override void Configure(IFunctionsHostBuilder builder)
         {
-            builder.Services.AddHttpClient();
-            builder.Services.AddLogging();
+            ConfigureServices(builder.Services);
 
-            builder.Services.AddOptions<WebhookSettings>()
+            builder
+                .UseAppSettings() // this is optional, this will bind IConfiguration in the container.
+                .UseAutofacServiceProviderFactory(ConfigureAutofacContainer);
+        }
+
+        /// <summary>
+        /// Configure Autofac container
+        /// </summary>
+        /// <param name="builder"></param>
+        private void ConfigureAutofacContainer(ContainerBuilder builder)
+        {
+            builder.Register(activator =>
+                {
+                    var xeroConfig = new XeroConfiguration();
+
+                    var config = activator.Resolve<IConfiguration>();
+                    config.GetSection(nameof(XeroConfiguration)).Bind(xeroConfig);
+
+                    return xeroConfig;
+                })
+                .AsSelf()
+                .SingleInstance();
+
+            // Register all functions that resides in a given namespace
+            // The function class itself will be created using autofac
+            builder
+                .RegisterAssemblyTypes(typeof(Startup).Assembly)
+                .InNamespace(typeof(IAzFunc).Namespace ?? string.Empty)
+                .AsSelf() // Azure Functions core code resolves a function class by itself.
+                .InstancePerTriggerRequest(); // This will scope nested dependencies to each function execution
+        }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddHttpClient();
+            services.AddLogging();
+
+            //services.AddOptions<XeroConfiguration>()
+            //    .Configure<IConfiguration>((settings, configuration) =>
+            //    {
+            //        configuration.GetSection("XeroConfiguration").Bind(settings);
+            //    });
+
+            services.AddOptions<WebhookSettings>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
                     configuration.GetSection("Xero:WebhookSettings").Bind(settings);
                 });
 
-            builder.Services.AddSingleton<ISignatureVerifier>((s) =>
-                {
-                    var settings = s.GetService<IOptions<WebhookSettings>>().Value;
-                    return new SignatureVerifier(settings);
-                }
-            );
+            services.AddSingleton<ISignatureVerifier>((s) =>
+            {
+                var settings = s.GetService<IOptions<WebhookSettings>>().Value;
+                return new SignatureVerifier(settings);
+            });
+
+            services.AddSingleton<XeroClient>();
+            services.AddSingleton<TokenStorage>();
+            services.AddScoped<TenantAccess>();
         }
     }
 }

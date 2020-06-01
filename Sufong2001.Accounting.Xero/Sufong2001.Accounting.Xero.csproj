@@ -1,7 +1,12 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xero.NetStandard.OAuth2" Version="3.0.0" />
+    <PackageReference Include="Xero.NetStandard.OAuth2Client" Version="0.0.5" />
+  </ItemGroup>
 
 </Project>
