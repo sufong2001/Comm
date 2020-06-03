@@ -22,7 +22,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServProcesses
         [FunctionName(ServiceNames.ProcessStarter)]
         public static async Task ProcessStarter(
             [QueueTrigger(QueueNames.CommProcess)] UploadCompleted uploadCompleted,
-            [OrchestrationClient] IDurableOrchestrationClient starter,
+            [DurableClient] IDurableOrchestrationClient starter,
             ILogger log)
         {
             var orchestrationId = await starter.StartNewAsync(OrchestratorNames.ProcessMessage, uploadCompleted);

@@ -68,6 +68,24 @@ namespace Sufong2001.Share.AzureStorage
             return results;
         }
 
+        public static async Task<IList<TableResult>> UpdateIn(this IEnumerable<ITableEntity> entities,
+            CloudTable cloudTable)
+        {
+            var batch = new TableBatchOperation();
+
+            ITableEntity BatchUpdate (ITableEntity e)
+            {
+                batch.InsertOrReplace(e);
+                return e;
+            }
+
+            var inserts = entities.Select(BatchUpdate).ToArray();
+
+            var results = await cloudTable.ExecuteBatchAsync(batch);
+
+            return results;
+        }
+
         public static async Task<IList<TableResult>> DeleteIn(this IEnumerable<ITableEntity> entities,
             CloudTable cloudTable)
         {

@@ -68,21 +68,21 @@ namespace Sufong2001.Comm.Tests.AzureFunctions
             var uploadDir = _app.Repository.GetBlobDirectory(BlobNames.UploadDirectory);
             var uploadTmpTable = _app.Repository.GetTable(TableNames.CommUpload);
 
-            //// call Azure Function
-            //var response = (ObjectResult)await Start(request, "Sample 1.pdf",
-            //    uploadDir,
-            //    uploadTmpTable,
-            //    new IdGenerator(), // idGenerator.Object,
-            //    _app.App,
-            //    _logger);
+            // call Azure Function
+            var response = (ObjectResult)await UploadFunctions.Start(request, "Sample 1.pdf",
+                uploadDir,
+                uploadTmpTable,
+                new IdGenerator(), // idGenerator.Object,
+                _app.App,
+                _logger);
 
-            //var upload = response.Value.IsOrMap<UploadSession>();
+            var upload = response.Value.IsOrMap<UploadSession>();
 
-            //Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
-            //Assert.Null(upload.ManifestFile);
-            //Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
+            Assert.Equal(StatusCodes.Status200OK, response.StatusCode);
+            Assert.Null(upload.ManifestFile);
+            Assert.Contains("Sample 1.pdf", upload.LastUploadedFile);
 
-            //_output.WriteLine(upload.ToJson(Formatting.Indented));
+            _output.WriteLine(upload.ToJson(Formatting.Indented));
         }
 
         [Fact]

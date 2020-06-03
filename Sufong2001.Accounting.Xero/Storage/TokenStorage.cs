@@ -4,7 +4,7 @@ using Xero.NetStandard.OAuth2.Token;
 
 namespace Sufong2001.Accounting.Xero.Storage
 {
-    public class TokenStorage
+    public class TokenStorage : ITokenStorage
     {
         private readonly string _serializedXeroTokenPath = "./xerotoken.json";
 

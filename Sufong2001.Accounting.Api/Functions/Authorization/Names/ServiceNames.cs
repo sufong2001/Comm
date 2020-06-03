@@ -5,6 +5,7 @@
         Authorization,
         Callback,
         Connection,
+        Refresh,
         Disconnect,
     }
 }

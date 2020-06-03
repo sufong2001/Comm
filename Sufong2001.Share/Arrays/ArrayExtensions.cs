@@ -12,10 +12,14 @@ namespace Sufong2001.Share.Arrays
                 .ToArray();
         }
 
-
         public static int IndexOf<T>(this T[] list, T search)
         {
             return Array.IndexOf(list, search);
+        }
+
+        public static string[] Names(this Enum e)
+        {
+            return Enum.GetNames(e.GetType());
         }
     }
 }

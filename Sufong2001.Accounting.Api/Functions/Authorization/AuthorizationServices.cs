@@ -1,14 +1,13 @@
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Sufong2001.Accounting.Api.Functions.Authorization.Names;
-using Sufong2001.Accounting.Xero.Storage;
-using System.Collections.Generic;
+using Sufong2001.Accounting.Api.Storage;
 using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Client;
-using Xero.NetStandard.OAuth2.Models;
 using Xero.NetStandard.OAuth2.Token;
 
 namespace Sufong2001.Accounting.Api.Functions.Authorization
@@ -16,9 +15,9 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
     public class AuthorizationServices
     {
         private readonly XeroClient _client;
-        private readonly TokenStorage _tokenStorage;
+        private readonly ITokenTable _tokenStorage;
 
-        public AuthorizationServices(XeroClient client, TokenStorage tokenStorage)
+        public AuthorizationServices(XeroClient client, ITokenTable tokenStorage)
         {
             _client = client;
             _tokenStorage = tokenStorage;
@@ -43,10 +42,6 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
 
             var xeroToken = (XeroOAuth2Token)await _client.RequestXeroTokenAsync(code);
 
-            List<Tenant> tenants = await _client.GetConnectionsAsync(xeroToken);
-
-            Tenant firstTenant = tenants[0];
-
             _tokenStorage.StoreToken(xeroToken);
 
             return new OkResult();
@@ -65,15 +60,30 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             return new JsonResult(tenants);
         }
 
+        [FunctionName(nameof(AuthorizationServiceNames.Refresh))]
+        public async Task<IActionResult> RefreshAsync(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Authorization/Refresh")] HttpRequest req
+            , ILogger log
+        )
+        {
+            var xeroToken = _tokenStorage.GetStoredToken();
+
+            xeroToken = (XeroOAuth2Token) await _client.RefreshAccessTokenAsync(xeroToken);
+
+            _tokenStorage.StoreToken(xeroToken);
+
+            return new JsonResult(xeroToken);
+        }
+
         [FunctionName(nameof(AuthorizationServiceNames.Disconnect))]
         public async Task<IActionResult> DiconnectAsync(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Authorization/Disconnect")] HttpRequest req
             , ILogger log
         )
         {
-            var xeroToken = _tokenStorage.GetStoredToken();
-            var xeroTenant = xeroToken.Tenants[0];
+            var xeroToken = _tokenStorage.GetStoredToken("");
 
+            var xeroTenant = xeroToken.Tenants.First();
             await _client.DeleteConnectionAsync(xeroToken, xeroTenant);
 
             _tokenStorage.DestroyToken();
