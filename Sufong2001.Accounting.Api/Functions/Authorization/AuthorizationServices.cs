@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Sufong2001.Accounting.Api.Functions.Authorization.Names;
 using Sufong2001.Accounting.Api.Storage;
 using System.Threading.Tasks;
+using Sufong2001.Accounting.Api.Storage.Token;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Token;
 
@@ -15,9 +16,9 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
     public class AuthorizationServices
     {
         private readonly XeroClient _client;
-        private readonly ITokenTable _tokenStorage;
+        private readonly ITokenStore _tokenStorage;
 
-        public AuthorizationServices(XeroClient client, ITokenTable tokenStorage)
+        public AuthorizationServices(XeroClient client, ITokenStore tokenStorage)
         {
             _client = client;
             _tokenStorage = tokenStorage;

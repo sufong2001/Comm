@@ -9,7 +9,7 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Sufong2001.Accounting.Tests.Invoices
 {
-    public class AccountApiTests : IClassFixture<ApplicationBaseFixture>
+    public class ConfigurationTests : IClassFixture<ApplicationBaseFixture>
     {
         private readonly ILogger _logger = TestFactory.CreateLogger();
 
@@ -18,7 +18,7 @@ namespace Sufong2001.Accounting.Tests.Invoices
         private readonly TenantAccess _access;
         private readonly AccountingApi _accountingApi;
 
-        public AccountApiTests(ITestOutputHelper output, ApplicationBaseFixture app)
+        public ConfigurationTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
             _output = output;
             _app = app;

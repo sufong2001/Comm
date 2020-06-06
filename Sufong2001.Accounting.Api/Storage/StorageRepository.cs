@@ -1,27 +1,29 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
-using Sufong2001.Accounting.Api.Storage.Names;
 using Sufong2001.Core.Storage.Interfaces;
 using Sufong2001.Share.Assembly;
-using Sufong2001.Share.Arrays;
 using Sufong2001.Share.String;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Sufong2001.Accounting.Api.Storage.Token.Names;
+using PartitionKey = Sufong2001.Accounting.Api.Storage.Token.Names.PartitionKey;
 
 namespace Sufong2001.Accounting.Api.Storage
 {
-    public class StorageRepository : IStorageRepository, IQueueRepository, ITableRepository, IBlobRepository
+    public class StorageRepository : IStorageRepository, IQueueRepository, ITableRepository, IBlobRepository, ICosmosDbRepository
     {
         public Guid Guid = Guid.NewGuid();
 
         private readonly CloudBlobClient _blobClient;
         private readonly CloudTableClient _cloudTableClient;
         private readonly CloudQueueClient _cloudQueueClient;
+        private readonly CosmosClient _cosmosClient;
 
-        public StorageRepository(StorageAccount storageAccount)
+        public StorageRepository(StorageAccount storageAccount, CosmosClient cosmosClient)
         {
             _blobClient = storageAccount.CreateCloudBlobClient();
 
@@ -29,26 +31,31 @@ namespace Sufong2001.Accounting.Api.Storage
 
             _cloudQueueClient = storageAccount.CreateCloudQueueClient();
 
-            CreateStorageIfNotExists().ConfigureAwait(false);
+            _cosmosClient = cosmosClient;
+
+            var result = CreateStorageIfNotExists().Result;
         }
 
         public async Task<bool[]> CreateStorageIfNotExists()
         {
-            var cloudTables = Enum.GetNames(typeof(TableName))
+            Database database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(nameof(DatabaseName.Sufong2001));
+            var container =  await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKey.pk)}");
+
+            var cloudTables = Enum.GetNames(typeof(ContainerName))
                  .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())
                  .ToArray();
 
-            var cloudQueues = typeof(QueueName).GetStaticValues()
-                .Select(n => _cloudQueueClient.GetQueueReference(n).CreateIfNotExistsAsync())
-                .ToArray();
+            //var cloudQueues = typeof(QueueName).GetStaticValues()
+            //    .Select(n => _cloudQueueClient.GetQueueReference(n).CreateIfNotExistsAsync())
+            //    .ToArray();
 
-            var cloudBlobs = typeof(BlobName).GetStaticValues()
-                .Select(n => n.Split("/").First())
-                .Distinct()
-                .Select(n => _blobClient.GetContainerReference(n).CreateIfNotExistsAsync())
-                .ToArray();
+            //var cloudBlobs = typeof(BlobName).GetStaticValues()
+            //    .Select(n => n.Split("/").First())
+            //    .Distinct()
+            //    .Select(n => _blobClient.GetContainerReference(n).CreateIfNotExistsAsync())
+            //    .ToArray();
 
-            var tasks = cloudTables.Concat(cloudQueues).Concat(cloudBlobs);
+            var tasks = cloudTables; // .Concat(cloudQueues).Concat(cloudBlobs);
 
             return await Task.WhenAll(tasks);
         }
@@ -88,6 +95,11 @@ namespace Sufong2001.Accounting.Api.Storage
                 .GetBlockBlobReference(file);
 
             return cloudBlockBlob;
+        }
+
+        public Container GetContainer(string containerName)
+        {
+            return _cosmosClient.GetContainer(nameof(DatabaseName.Sufong2001), containerName);
         }
     }
 }

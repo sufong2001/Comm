@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection.AzureFunctions;
 using AutoMapper;
+using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
@@ -10,11 +11,11 @@ using Sufong2001.Accounting.Api;
 using Sufong2001.Accounting.Api.Functions;
 using Sufong2001.Accounting.Api.Storage;
 using Sufong2001.Accounting.Xero;
-using Sufong2001.Accounting.Xero.Storage;
 using Sufong2001.Accounting.Xero.Webhooks;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
+using ContainerBuilder = Autofac.ContainerBuilder;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -62,6 +63,18 @@ namespace Sufong2001.Accounting.Api
                 .AsSelf()
                 .SingleInstance();
 
+            // register Cosmos DB
+            builder.Register(activator =>
+                {
+                    var config = activator.Resolve<IConfiguration>();
+                    var connectionString = config["CosmosDB:ConnectionString"];
+                    var cosmosClientBuilder = new CosmosClientBuilder(connectionString);
+
+                    return cosmosClientBuilder.Build();
+                })
+                .AsSelf()
+                .SingleInstance();
+
             // Register all functions that resides in a given namespace
             // The function class itself will be created using autofac
             builder
@@ -96,7 +109,7 @@ namespace Sufong2001.Accounting.Api
             services.AddOptions<WebhookSettings>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
-                    configuration.GetSection("Xero:WebhookSettings").Bind(settings);
+                    configuration.GetSection("XeroConfiguration:WebhookSettings").Bind(settings);
                 });
 
             services.AddSingleton<ISignatureVerifier>((s) =>

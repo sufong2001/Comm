@@ -1,38 +1,21 @@
-﻿using AutoMapper;
-using Microsoft.Azure.Cosmos.Table;
-using Sufong2001.Accounting.Api.Storage.Names;
-using Sufong2001.Accounting.Api.Storage.Token;
+﻿using Microsoft.Azure.Cosmos.Table;
 using Sufong2001.Core.Storage.Interfaces;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.Json;
 using System;
 using System.Linq;
+using Sufong2001.Accounting.Api.Storage.Token.Names;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace Sufong2001.Accounting.Api.Storage
+namespace Sufong2001.Accounting.Api.Storage.Token
 {
-    public interface ITokenTable
-    {
-        void StoreToken(XeroOAuth2Token xeroToken);
-
-        //Task<XeroOAuth2Token> GetStoredToken(string tenantId = null);
-
-        XeroOAuth2Token GetStoredToken(string tenantId = null);
-
-        bool TokenExists();
-
-        void DestroyToken();
-    }
-
-    public class TokenTable : ITokenTable
+    public class TokenTable : ITokenStore
     {
         private readonly CloudTable _table;
-        private IMapper _mapper;
 
-        public TokenTable(ITableRepository storgeRepository, IMapper mapper)
+        public TokenTable(ITableRepository storgeRepository)
         {
-            _table = storgeRepository.GetTable(nameof(TableName.AccoTokens));
-            _mapper = mapper;
+            _table = storgeRepository.GetTable(nameof(ContainerName.AccoTokens));
         }
 
         public async void StoreToken(XeroOAuth2Token xeroToken)
@@ -40,10 +23,10 @@ namespace Sufong2001.Accounting.Api.Storage
             var records = xeroToken.Tenants
                 .Select(t =>
                 {
-                    var token = xeroToken.IsOrMap<TokenRow>();
+                    var token = xeroToken.IsOrMap<Token>();
                     token.Tenant = t; // new[] { t }.ToList(); // reset to store only one tenant details
 
-                    return token.CreatTableEntity(nameof(TablePartition.Xero), t.TenantId.ToString());
+                    return token.CreatTableEntity(nameof(PartitionValue.Xero), t.TenantId.ToString());
                 });
 
             await records.UpdateIn(_table);
@@ -51,8 +34,8 @@ namespace Sufong2001.Accounting.Api.Storage
 
         public XeroOAuth2Token GetStoredToken(string tenantId = null)
         {
-            var query = _table.CreateQuery<TableEntityAdapter<TokenRow>>()
-                .Where(x => x.PartitionKey == nameof(TablePartition.Xero));
+            var query = _table.CreateQuery<TableEntityAdapter<Token>>()
+                .Where(x => x.PartitionKey == nameof(PartitionValue.Xero));
 
             if (tenantId != null)
             {

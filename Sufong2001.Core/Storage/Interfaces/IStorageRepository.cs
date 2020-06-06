@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.Queue;
 
@@ -13,5 +14,7 @@ namespace Sufong2001.Core.Storage.Interfaces
         CloudBlobDirectory GetBlobDirectory(string directoryPath);
 
         CloudBlockBlob GetBlockBlob(string filePath);
+
+        Container GetContainer(string containerName);
     }
 }
