@@ -10,7 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Sufong2001.Accounting.Api.Storage.Token.Names;
-using PartitionKey = Sufong2001.Accounting.Api.Storage.Token.Names.PartitionKey;
+
 
 namespace Sufong2001.Accounting.Api.Storage
 {
@@ -39,7 +39,7 @@ namespace Sufong2001.Accounting.Api.Storage
         public async Task<bool[]> CreateStorageIfNotExists()
         {
             Database database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(nameof(DatabaseName.Sufong2001));
-            var container =  await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKey.pk)}");
+            var container =  await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKeyName.pk)}");
 
             var cloudTables = Enum.GetNames(typeof(ContainerName))
                  .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())

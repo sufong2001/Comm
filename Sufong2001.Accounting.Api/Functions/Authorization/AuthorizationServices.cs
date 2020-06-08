@@ -43,7 +43,7 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
 
             var xeroToken = (XeroOAuth2Token)await _client.RequestXeroTokenAsync(code);
 
-            _tokenStorage.StoreToken(xeroToken);
+            await _tokenStorage.StoreToken(xeroToken);
 
             return new OkResult();
         }
@@ -54,7 +54,7 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = _tokenStorage.GetStoredToken();
+            var xeroToken = await _tokenStorage.GetStoredToken();
 
             var tenants = await _client.GetConnectionsAsync(xeroToken);
 
@@ -67,11 +67,11 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = _tokenStorage.GetStoredToken();
+            var xeroToken = await _tokenStorage.GetStoredToken();
 
             xeroToken = (XeroOAuth2Token) await _client.RefreshAccessTokenAsync(xeroToken);
 
-            _tokenStorage.StoreToken(xeroToken);
+            await _tokenStorage.StoreToken(xeroToken);
 
             return new JsonResult(xeroToken);
         }
@@ -82,12 +82,12 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = _tokenStorage.GetStoredToken("");
+            var xeroToken = await _tokenStorage.GetStoredToken("");
 
             var xeroTenant = xeroToken.Tenants.First();
             await _client.DeleteConnectionAsync(xeroToken, xeroTenant);
 
-            _tokenStorage.DestroyToken();
+            await _tokenStorage.DestroyToken();
 
             return new JsonResult(xeroTenant);
         }

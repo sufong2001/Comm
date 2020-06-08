@@ -10,12 +10,12 @@
         AccoTokens
     }
 
-    public enum PartitionKey
+    public enum PartitionKeyName
     {
         pk
     }
 
-    public enum PartitionValue
+    public enum PartitionKeyValue
     {
         Xero
     }

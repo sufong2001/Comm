@@ -4,13 +4,12 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Sufong2001.Accounting.Api.Storage;
+using Sufong2001.Accounting.Api.Storage.Token;
 using Sufong2001.Accounting.Xero;
 using Sufong2001.Accounting.Xero.Storage;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
-using System;
-using System.IO;
-using Sufong2001.Accounting.Api.Storage.Token;
 using Sufong2001.Core.Storage.Interfaces;
+using System;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 
@@ -18,19 +17,16 @@ namespace Sufong2001.Accounting.Tests
 {
     public class ApplicationBaseFixture
     {
-        public IConfiguration Configuration { get; }
+        private static readonly IConfigurationRoot Configuration = new ConfigurationBuilder()
+            .SetBasePath(Environment.CurrentDirectory)
+            .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
+            .AddEnvironmentVariables()
+            .Build();
+
         public ServiceProvider ServiceProvider { get; }
 
         public ApplicationBaseFixture()
         {
-            // build configuration
-            var configurationBuilder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
-
-            Configuration = configurationBuilder.Build();
-
             // build service provider
             var serviceCollection = new ServiceCollection();
             ConfigureServices(serviceCollection);
@@ -59,10 +55,17 @@ namespace Sufong2001.Accounting.Tests
 
         private CosmosClient GetCosmosClient(IServiceProvider provider)
         {
+            var serializerOptions = new CosmosSerializationOptions()
+            {
+                IgnoreNullValues = true,
+                Indented = false,
+                PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+            };
+
             var connectionString = Configuration["Values:CosmosDB:ConnectionString"];
             var cosmosClientBuilder = new CosmosClientBuilder(connectionString);
 
-            return cosmosClientBuilder.Build();
+            return cosmosClientBuilder.WithSerializerOptions(serializerOptions).Build();
         }
 
         private XeroConfiguration GetXeroConfiguration(IServiceProvider provider)

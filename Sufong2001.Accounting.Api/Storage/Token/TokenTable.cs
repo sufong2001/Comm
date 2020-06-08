@@ -1,10 +1,12 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Cosmos.Table.Queryable;
+using Sufong2001.Accounting.Api.Storage.Token.Names;
 using Sufong2001.Core.Storage.Interfaces;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.Json;
 using System;
 using System.Linq;
-using Sufong2001.Accounting.Api.Storage.Token.Names;
+using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Token;
 
 namespace Sufong2001.Accounting.Api.Storage.Token
@@ -18,7 +20,7 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             _table = storgeRepository.GetTable(nameof(ContainerName.AccoTokens));
         }
 
-        public async void StoreToken(XeroOAuth2Token xeroToken)
+        public async Task StoreToken(XeroOAuth2Token xeroToken)
         {
             var records = xeroToken.Tenants
                 .Select(t =>
@@ -26,23 +28,35 @@ namespace Sufong2001.Accounting.Api.Storage.Token
                     var token = xeroToken.IsOrMap<Token>();
                     token.Tenant = t; // new[] { t }.ToList(); // reset to store only one tenant details
 
-                    return token.CreatTableEntity(nameof(PartitionValue.Xero), t.TenantId.ToString());
+                    return token.CreatTableEntity(nameof(PartitionKeyValue.Xero), t.TenantId.ToString());
                 });
 
             await records.UpdateIn(_table);
         }
 
-        public XeroOAuth2Token GetStoredToken(string tenantId = null)
+        public async Task<XeroOAuth2Token> GetStoredToken(string tenantId = null)
         {
-            var query = _table.CreateQuery<TableEntityAdapter<Token>>()
-                .Where(x => x.PartitionKey == nameof(PartitionValue.Xero));
-
-            if (tenantId != null)
+            // strategy 1 by query
+            async Task<Token> GetTheFirstOne()
             {
-                query = query.Where(x => x.RowKey == tenantId);
+                var query = _table.CreateQuery<TableEntityAdapter<Token>>()
+                    .Where(r => r.PartitionKey == nameof(PartitionKeyValue.Xero))
+                    .AsTableQuery();
+
+                var resp = await _table.ExecuteQuerySegmentedAsync(query, null);
+
+                return resp.Results.FirstOrDefault()?.OriginalEntity;
             }
 
-            var result = query.FirstOrDefault()?.OriginalEntity;
+            // strategy 2 by read item
+            async Task<Token> GetByTenantId()
+            {
+                var resp = await _table.Retrieve<Token>(nameof(PartitionKeyValue.Xero), tenantId);
+
+                return resp;
+            }
+
+            var result = tenantId == null ? await GetTheFirstOne() : await GetByTenantId();
 
             if (result == null) return null;
 
@@ -52,12 +66,12 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             return xeroToken;
         }
 
-        public bool TokenExists()
+        public Task<bool> TokenExists()
         {
             throw new NotImplementedException();
         }
 
-        public void DestroyToken()
+        public Task DestroyToken()
         {
             throw new NotImplementedException();
         }

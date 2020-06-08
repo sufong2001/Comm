@@ -73,7 +73,7 @@ namespace Sufong2001.Share.AzureStorage
         {
             var batch = new TableBatchOperation();
 
-            ITableEntity BatchUpdate (ITableEntity e)
+            ITableEntity BatchUpdate(ITableEntity e)
             {
                 batch.InsertOrReplace(e);
                 return e;
@@ -184,6 +184,17 @@ namespace Sufong2001.Share.AzureStorage
             var results = await cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken);
 
             return results;
+        }
+
+        public static async Task<T> Retrieve<T>(this CloudTable table, string partitionKey,
+            string rowKey)
+        {
+            var retrieveOperation = TableOperation.Retrieve<TableEntityAdapter<T>>(partitionKey, rowKey);
+            var result = await table.ExecuteAsync(retrieveOperation);
+
+            return result.Result is TableEntityAdapter<T> customer
+                ? customer.OriginalEntity
+                : default;
         }
     }
 

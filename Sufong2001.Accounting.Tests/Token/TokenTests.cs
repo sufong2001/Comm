@@ -1,9 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Sufong2001.Accounting.Api.Storage.Token;
-using Sufong2001.Accounting.Xero.Storage;
-using Sufong2001.Accounting.Xero.Webhooks.Config;
 using Sufong2001.Test.AzureFunctions;
-using Xero.NetStandard.OAuth2.Config;
 using Xunit;
 using Xunit.Abstractions;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -24,24 +21,22 @@ namespace Sufong2001.Accounting.Tests.Token
         }
 
         [Fact]
-        public void Should_Token_Has_StoreCorrectly()
+        public async void Should_Token_Has_StoreCorrectly()
         {
             var tokenStorage = _app.ServiceProvider.GetService<TokenTable>();
+            var token = await tokenStorage.GetStoredToken();
+
             var tokenContainer = _app.ServiceProvider.GetService<TokenContainer>();
 
-            tokenContainer.StoreToken(tokenStorage.GetStoredToken());
-
+            await tokenContainer.StoreToken(token);
         }
 
         [Fact]
-        public void Should_Token_Has_ReadCorrectly()
+        public async void Should_Token_Has_ReadCorrectly()
         {
-
             var tokenContainer = _app.ServiceProvider.GetService<TokenContainer>();
 
-            var token = tokenContainer.GetStoredToken();
-
+            var token = await tokenContainer.GetStoredToken();
         }
-
     }
 }

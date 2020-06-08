@@ -69,7 +69,7 @@ namespace Sufong2001.Share.Json
         {
             if (objs == null || !objs.Any()) return default(T);
 
-            mergeSettings = mergeSettings ?? new JsonMergeSettings
+            mergeSettings ??= new JsonMergeSettings
             {
                 MergeArrayHandling = MergeArrayHandling.Union,
             };

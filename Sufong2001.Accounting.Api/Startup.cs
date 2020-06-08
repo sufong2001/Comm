@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection.AzureFunctions;
 using AutoMapper;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs;
@@ -68,8 +69,17 @@ namespace Sufong2001.Accounting.Api
                 {
                     var config = activator.Resolve<IConfiguration>();
                     var connectionString = config["CosmosDB:ConnectionString"];
-                    var cosmosClientBuilder = new CosmosClientBuilder(connectionString);
 
+                    var serializerOptions = new CosmosSerializationOptions()
+                    {
+                        IgnoreNullValues = true,
+                        Indented = false,
+                        PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase
+                    };
+
+                    var cosmosClientBuilder = new CosmosClientBuilder(connectionString)
+                        .WithSerializerOptions(serializerOptions);
+                    
                     return cosmosClientBuilder.Build();
                 })
                 .AsSelf()
@@ -98,7 +108,7 @@ namespace Sufong2001.Accounting.Api
         {
             services.AddHttpClient();
             services.AddLogging();
-            services.AddAutoMapper(typeof(Startup).Assembly);
+            //services.AddAutoMapper(typeof(Startup).Assembly);
 
             //services.AddOptions<XeroConfiguration>()
             //    .Configure<IConfiguration>((settings, configuration) =>
