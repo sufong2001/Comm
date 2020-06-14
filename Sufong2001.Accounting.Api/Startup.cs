@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using Sufong2001.Accounting.Api;
 using Sufong2001.Accounting.Api.Functions;
 using Sufong2001.Accounting.Api.Storage;
+using Sufong2001.Accounting.Api.Storage.Token;
 using Sufong2001.Accounting.Xero;
 using Sufong2001.Accounting.Xero.Webhooks;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
@@ -97,7 +98,13 @@ namespace Sufong2001.Accounting.Api
                 .RegisterAssemblyTypes(typeof(Startup).Assembly)
                 .InNamespace(typeof(IStorage).Namespace ?? string.Empty)
                 .AsImplementedInterfaces()
-                .InstancePerTriggerRequest(); // This will scope nested dependencies to each function execution
+                .SingleInstance(); // This will scope nested dependencies to each function execution
+
+
+            //builder.RegisterType<TokenContainer>()
+            //    .As<ITokenStore>()
+            //    .SingleInstance();
+
         }
 
         /// <summary>
