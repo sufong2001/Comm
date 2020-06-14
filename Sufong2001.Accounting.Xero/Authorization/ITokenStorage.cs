@@ -1,6 +1,6 @@
 ﻿using Xero.NetStandard.OAuth2.Token;
 
-namespace Sufong2001.Accounting.Xero.Storage
+namespace Sufong2001.Accounting.Xero.Authorization
 {
     public interface ITokenStorage
     {

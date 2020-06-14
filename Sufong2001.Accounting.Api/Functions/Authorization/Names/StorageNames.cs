@@ -1,4 +1,4 @@
-﻿namespace Sufong2001.Accounting.Api.Storage.Token.Names
+﻿namespace Sufong2001.Accounting.Api.Functions.Authorization.Names
 {
     public enum DatabaseName
     {

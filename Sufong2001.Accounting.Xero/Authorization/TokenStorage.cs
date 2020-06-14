@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
-using System.IO;
+﻿using System.IO;
+using Newtonsoft.Json;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace Sufong2001.Accounting.Xero.Storage
+namespace Sufong2001.Accounting.Xero.Authorization
 {
     public class TokenStorage : ITokenStorage
     {

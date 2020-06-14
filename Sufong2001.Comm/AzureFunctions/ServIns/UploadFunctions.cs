@@ -95,7 +95,7 @@ namespace Sufong2001.Comm.AzureFunctions.ServIns
                 upload.OriginalEntity.ManifestFile = new[] { upload.OriginalEntity.ManifestFile, filename }.IsIfManifest();
                 upload.OriginalEntity.LastUploadedFile = filename;
 
-                var result = await upload.Update(uploadTable);
+                var result = await upload.UpdateIn(uploadTable);
 
                 return new OkObjectResult(upload.OriginalEntity);
             }

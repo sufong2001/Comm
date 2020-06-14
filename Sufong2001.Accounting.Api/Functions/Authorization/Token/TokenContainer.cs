@@ -1,14 +1,14 @@
-﻿using Microsoft.Azure.Cosmos;
-using Sufong2001.Accounting.Api.Storage.Token.Names;
-using Sufong2001.Core.Storage.Interfaces;
-using Sufong2001.Share.Json;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos;
+using Sufong2001.Accounting.Api.Functions.Authorization.Names;
+using Sufong2001.Core.Storage.Interfaces;
+using Sufong2001.Share.Json;
 using Xero.NetStandard.OAuth2.Token;
 using QueryRequestOptions = Microsoft.Azure.Cosmos.QueryRequestOptions;
 
-namespace Sufong2001.Accounting.Api.Storage.Token
+namespace Sufong2001.Accounting.Api.Functions.Authorization.Token
 {
     public class TokenContainer : ITokenStore
     {
@@ -24,7 +24,7 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             var operations = xeroToken.Tenants
                 .Select(t =>
                 {
-                    var token = xeroToken.IsOrMap<Token>();
+                    var token = xeroToken.IsOrMap<Functions.Authorization.Token.Token>();
                     token.Tenant = t; // new[] { t }.ToList(); // reset to store only one tenant details
                     token.Id = t.TenantId.ToString();
                     token.Pk = nameof(PartitionKeyValue.Xero);
@@ -42,7 +42,7 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             var partitionKey = new PartitionKey(nameof(PartitionKeyValue.Xero));
 
             // strategy 1 by query
-            async Task<Token> GetTheFirstOne()
+            async Task<Functions.Authorization.Token.Token> GetTheFirstOne()
             {
                 var queryRequestOptions = new QueryRequestOptions()
                 {
@@ -50,7 +50,7 @@ namespace Sufong2001.Accounting.Api.Storage.Token
                     MaxConcurrency = 1
                 };
 
-                var query = _container.GetItemQueryIterator<Token>(
+                var query = _container.GetItemQueryIterator<Functions.Authorization.Token.Token>(
                     "SELECT top 1 * FROM c",
                     requestOptions: queryRequestOptions);
 
@@ -60,9 +60,9 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             }
 
             // strategy 2 by read item
-            async Task<Token> GetByTenantId()
+            async Task<Functions.Authorization.Token.Token> GetByTenantId()
             {
-                var resp = await _container.ReadItemAsync<Token>(tenantId, partitionKey);
+                var resp = await _container.ReadItemAsync<Functions.Authorization.Token.Token>(tenantId, partitionKey);
 
                 return resp;
             }

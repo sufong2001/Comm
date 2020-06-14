@@ -1,15 +1,15 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Cosmos.Table.Queryable;
-using Sufong2001.Accounting.Api.Storage.Token.Names;
+using Sufong2001.Accounting.Api.Functions.Authorization.Names;
 using Sufong2001.Core.Storage.Interfaces;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.Json;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace Sufong2001.Accounting.Api.Storage.Token
+namespace Sufong2001.Accounting.Api.Functions.Authorization.Token
 {
     public class TokenTable : ITokenStore
     {
@@ -25,7 +25,7 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             var records = xeroToken.Tenants
                 .Select(t =>
                 {
-                    var token = xeroToken.IsOrMap<Token>();
+                    var token = xeroToken.IsOrMap<Functions.Authorization.Token.Token>();
                     token.Tenant = t; // new[] { t }.ToList(); // reset to store only one tenant details
 
                     return token.CreatTableEntity(nameof(PartitionKeyValue.Xero), t.TenantId.ToString());
@@ -37,9 +37,9 @@ namespace Sufong2001.Accounting.Api.Storage.Token
         public async Task<XeroOAuth2Token> GetStoredToken(string tenantId = null)
         {
             // strategy 1 by query
-            async Task<Token> GetTheFirstOne()
+            async Task<Functions.Authorization.Token.Token> GetTheFirstOne()
             {
-                var query = _table.CreateQuery<TableEntityAdapter<Token>>()
+                var query = _table.CreateQuery<TableEntityAdapter<Functions.Authorization.Token.Token>>()
                     .Where(r => r.PartitionKey == nameof(PartitionKeyValue.Xero))
                     .AsTableQuery();
 
@@ -49,9 +49,9 @@ namespace Sufong2001.Accounting.Api.Storage.Token
             }
 
             // strategy 2 by read item
-            async Task<Token> GetByTenantId()
+            async Task<Functions.Authorization.Token.Token> GetByTenantId()
             {
-                var resp = await _table.Retrieve<Token>(nameof(PartitionKeyValue.Xero), tenantId);
+                var resp = await _table.Retrieve<Functions.Authorization.Token.Token>(nameof(PartitionKeyValue.Xero), tenantId);
 
                 return resp;
             }

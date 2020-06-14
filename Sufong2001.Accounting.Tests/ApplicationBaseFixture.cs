@@ -3,13 +3,14 @@ using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Sufong2001.Accounting.Api.Functions.Authorization.Token;
 using Sufong2001.Accounting.Api.Storage;
-using Sufong2001.Accounting.Api.Storage.Token;
 using Sufong2001.Accounting.Xero;
-using Sufong2001.Accounting.Xero.Storage;
+using Sufong2001.Accounting.Xero.Authorization;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
 using Sufong2001.Core.Storage.Interfaces;
 using System;
+using Sufong2001.Accounting.Api.Functions.Webhooks.Events;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 
@@ -48,6 +49,7 @@ namespace Sufong2001.Accounting.Tests
             services.AddSingleton<TokenStorage>();
             services.AddSingleton<TokenContainer>();
             services.AddSingleton<TokenTable>();
+            services.AddSingleton<PayloadTable>();
             services.AddSingleton<XeroClient>();
 
             services.AddSingleton<TenantAccess>();

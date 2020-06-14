@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection.AzureFunctions;
-using AutoMapper;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
@@ -11,7 +10,6 @@ using Microsoft.Extensions.Options;
 using Sufong2001.Accounting.Api;
 using Sufong2001.Accounting.Api.Functions;
 using Sufong2001.Accounting.Api.Storage;
-using Sufong2001.Accounting.Api.Storage.Token;
 using Sufong2001.Accounting.Xero;
 using Sufong2001.Accounting.Xero.Webhooks;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
@@ -80,7 +78,7 @@ namespace Sufong2001.Accounting.Api
 
                     var cosmosClientBuilder = new CosmosClientBuilder(connectionString)
                         .WithSerializerOptions(serializerOptions);
-                    
+
                     return cosmosClientBuilder.Build();
                 })
                 .AsSelf()
@@ -100,11 +98,9 @@ namespace Sufong2001.Accounting.Api
                 .AsImplementedInterfaces()
                 .SingleInstance(); // This will scope nested dependencies to each function execution
 
-
             //builder.RegisterType<TokenContainer>()
             //    .As<ITokenStore>()
             //    .SingleInstance();
-
         }
 
         /// <summary>

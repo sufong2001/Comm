@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Xero.NetStandard.OAuth2.Models;
 
-namespace Sufong2001.Accounting.Api.Storage.Token
+namespace Sufong2001.Accounting.Api.Functions.Authorization.Token
 {
     public class Token
     {

@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 
 namespace Sufong2001.Share.Arrays
 {
@@ -20,6 +22,18 @@ namespace Sufong2001.Share.Arrays
         public static string[] Names(this Enum e)
         {
             return Enum.GetNames(e.GetType());
+        }
+
+        public static string GetEnumDescription(this Enum value)
+        {
+            var fi = value.GetType().GetField(value.ToString());
+
+            if (fi.GetCustomAttributes(typeof(DescriptionAttribute), false) is DescriptionAttribute[] attributes && attributes.Any())
+            {
+                return attributes.First().Description;
+            }
+
+            return value.ToString();
         }
     }
 }

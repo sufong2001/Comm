@@ -1,6 +1,6 @@
-﻿using Sufong2001.Accounting.Xero.Storage;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Sufong2001.Accounting.Xero.Authorization;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Token;
 

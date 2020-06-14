@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using Sufong2001.Accounting.Api.Storage.Token;
+using Sufong2001.Accounting.Api.Functions.Authorization.Token;
 using Sufong2001.Test.AzureFunctions;
 using Xunit;
 using Xunit.Abstractions;
@@ -7,14 +7,14 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace Sufong2001.Accounting.Tests.Token
 {
-    public class TokenTests : IClassFixture<ApplicationBaseFixture>
+    public class WebhookTests : IClassFixture<ApplicationBaseFixture>
     {
         private readonly ILogger _logger = TestFactory.CreateLogger();
 
         private readonly ITestOutputHelper _output;
         private readonly ApplicationBaseFixture _app;
 
-        public TokenTests(ITestOutputHelper output, ApplicationBaseFixture app)
+        public WebhookTests(ITestOutputHelper output, ApplicationBaseFixture app)
         {
             _output = output;
             _app = app;

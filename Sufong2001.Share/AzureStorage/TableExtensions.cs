@@ -29,7 +29,7 @@ namespace Sufong2001.Share.AzureStorage
             return result;
         }
 
-        public static async Task<TableResult> Update(this ITableEntity entity, CloudTable cloudTable)
+        public static async Task<TableResult> UpdateIn(this ITableEntity entity, CloudTable cloudTable)
         {
             var insertOperation = entity.CreateOperationInsertOrReplace();
 

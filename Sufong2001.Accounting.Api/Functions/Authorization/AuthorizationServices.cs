@@ -1,13 +1,12 @@
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Sufong2001.Accounting.Api.Functions.Authorization.Names;
-using Sufong2001.Accounting.Api.Storage;
+using Sufong2001.Accounting.Api.Functions.Authorization.Token;
+using System.Linq;
 using System.Threading.Tasks;
-using Sufong2001.Accounting.Api.Storage.Token;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Token;
 
@@ -69,7 +68,7 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
         {
             var xeroToken = await _tokenStorage.GetStoredToken();
 
-            xeroToken = (XeroOAuth2Token) await _client.RefreshAccessTokenAsync(xeroToken);
+            xeroToken = (XeroOAuth2Token)await _client.RefreshAccessTokenAsync(xeroToken);
 
             await _tokenStorage.StoreToken(xeroToken);
 

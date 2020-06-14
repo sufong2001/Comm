@@ -4,13 +4,16 @@ using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
 using Sufong2001.Core.Storage.Interfaces;
-using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Sufong2001.Accounting.Api.Storage.Token.Names;
-
+using Sufong2001.Accounting.Api.Functions.Authorization.Names;
+using Sufong2001.Accounting.Api.Functions.Webhooks.Names;
+using Sufong2001.Share.Arrays;
+using Sufong2001.Share.Assembly;
+using DatabaseName = Sufong2001.Accounting.Api.Functions.Authorization.Names.DatabaseName;
+using PartitionKeyName = Sufong2001.Accounting.Api.Functions.Authorization.Names.PartitionKeyName;
 
 namespace Sufong2001.Accounting.Api.Storage
 {
@@ -39,11 +42,19 @@ namespace Sufong2001.Accounting.Api.Storage
         public async Task<bool[]> CreateStorageIfNotExists()
         {
             Database database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(nameof(DatabaseName.Sufong2001));
-            var container =  await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKeyName.pk)}");
+            var container = await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKeyName.pk)}");
 
             var cloudTables = Enum.GetNames(typeof(ContainerName))
                  .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())
                  .ToArray();
+
+            var webhookTables = Enum.GetNames(typeof(WebhookContainerName))
+                .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())
+                .ToArray();
+
+            var webhookQueues = typeof(WebhookQueueNames).GetStaticValues()
+                .Select(n => _cloudQueueClient.GetQueueReference(n).CreateIfNotExistsAsync())
+                .ToArray();
 
             //var cloudQueues = typeof(QueueName).GetStaticValues()
             //    .Select(n => _cloudQueueClient.GetQueueReference(n).CreateIfNotExistsAsync())
@@ -55,7 +66,7 @@ namespace Sufong2001.Accounting.Api.Storage
             //    .Select(n => _blobClient.GetContainerReference(n).CreateIfNotExistsAsync())
             //    .ToArray();
 
-            var tasks = cloudTables; // .Concat(cloudQueues).Concat(cloudBlobs);
+            var tasks = cloudTables.Concat(webhookTables).Concat(webhookQueues); // .Concat(cloudQueues).Concat(cloudBlobs);
 
             return await Task.WhenAll(tasks);
         }
