@@ -1,15 +1,14 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Sufong2001.Accounting.Api.Storage;
 using Xero.NetStandard.OAuth2.Models;
 
 namespace Sufong2001.Accounting.Api.Functions.Authorization.Token
 {
-    public class Token
+    public class Token : IStorageEnitity
     {
-        [JsonProperty(PropertyName = "id", NullValueHandling = NullValueHandling.Ignore)]
         public string Id { get; set; }
 
-        [JsonProperty(PropertyName = "pk", NullValueHandling = NullValueHandling.Ignore)]
         public string Pk { get; set; }
 
         public Tenant Tenant { get; set; }

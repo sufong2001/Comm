@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Cosmos.Table.Queryable;
 using Sufong2001.Accounting.Api.Functions.Authorization.Names;
+using Sufong2001.Accounting.Xero.Authorization;
 using Sufong2001.Core.Storage.Interfaces;
 using Sufong2001.Share.AzureStorage;
 using Sufong2001.Share.Json;

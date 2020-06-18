@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Token;
 
-namespace Sufong2001.Accounting.Api.Functions.Authorization.Token
+namespace Sufong2001.Accounting.Xero.Authorization
 {
     public interface ITokenStore
     {

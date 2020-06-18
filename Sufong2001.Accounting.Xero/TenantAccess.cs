@@ -9,9 +9,9 @@ namespace Sufong2001.Accounting.Xero
     public class TenantAccess
     {
         public XeroClient Client { get; }
-        public TokenStorage TokenStorage { get; }
+        public ITokenStore TokenStorage { get; }
 
-        public TenantAccess(XeroClient client, TokenStorage tokenStorage)
+        public TenantAccess(XeroClient client, ITokenStore tokenStorage)
         {
             Client = client;
             TokenStorage = tokenStorage;
@@ -19,13 +19,13 @@ namespace Sufong2001.Accounting.Xero
 
         public async Task<(string accessToken, string tenantId)> GetAccessToken()
         {
-            var xeroToken = TokenStorage.GetStoredToken();
+            var xeroToken = await TokenStorage.GetStoredToken();
             var utcTimeNow = DateTime.UtcNow;
 
             if (utcTimeNow > xeroToken.ExpiresAtUtc)
             {
                 xeroToken = (XeroOAuth2Token)await Client.RefreshAccessTokenAsync(xeroToken);
-                TokenStorage.StoreToken(xeroToken);
+                await TokenStorage.StoreToken(xeroToken);
             }
 
             var accessToken = xeroToken.AccessToken;

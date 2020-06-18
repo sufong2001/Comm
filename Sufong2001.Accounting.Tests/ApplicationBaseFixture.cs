@@ -51,6 +51,7 @@ namespace Sufong2001.Accounting.Tests
             services.AddSingleton<TokenTable>();
             services.AddSingleton<PayloadTable>();
             services.AddSingleton<XeroClient>();
+            services.AddSingleton<ITokenStore, TokenTable>();
 
             services.AddSingleton<TenantAccess>();
         }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Sufong2001.Accounting.Xero;
 using Sufong2001.Test.AzureFunctions;
 using System;
+using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Api;
 using Xunit;
 using Xunit.Abstractions;
@@ -36,6 +37,21 @@ namespace Sufong2001.Accounting.Tests.Invoices
 
             var response = await _accountingApi.GetInvoicesAsync(accessToken, xeroTenantId, null, invoicesFilter);
             var invoices = response._Invoices;
+        }
+
+        [Fact]
+        public async void Should_AccountApi_Parallet_Test()
+        {
+            var (accessToken, xeroTenantId) = await _access.GetAccessToken();
+
+            Parallel.For(0, 3, new ParallelOptions() { MaxDegreeOfParallelism = 2}, async i =>
+                {
+                    var sevenDaysAgo = DateTime.Now.AddDays(-30).ToString("yyyy, MM, dd");
+                    var invoicesFilter = "Date >= DateTime(" + sevenDaysAgo + ")";
+
+                    var response = await _accountingApi.GetInvoicesAsync(accessToken, xeroTenantId, null, invoicesFilter);
+                    var invoices = response._Invoices;
+                });
         }
     }
 }

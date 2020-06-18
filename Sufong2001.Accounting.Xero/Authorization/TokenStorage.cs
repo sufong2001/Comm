@@ -1,37 +1,44 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using System.IO;
+using System.Threading.Tasks;
 using Xero.NetStandard.OAuth2.Token;
 
 namespace Sufong2001.Accounting.Xero.Authorization
 {
-    public class TokenStorage : ITokenStorage
+    public class TokenStorage : ITokenStore
     {
         private readonly string _serializedXeroTokenPath = "./xerotoken.json";
 
-        public void StoreToken(XeroOAuth2Token xeroToken)
+        public async Task StoreToken(XeroOAuth2Token xeroToken)
         {
-            var serializedXeroToken = JsonConvert.SerializeObject(xeroToken);
-            System.IO.File.WriteAllText(_serializedXeroTokenPath, serializedXeroToken);
+            await Task.Run(() =>
+            {
+                var serializedXeroToken = JsonConvert.SerializeObject(xeroToken);
+                File.WriteAllText(_serializedXeroTokenPath, serializedXeroToken);
+            });
         }
 
-        public XeroOAuth2Token GetStoredToken()
+        public async Task<XeroOAuth2Token> GetStoredToken(string tenantId = null)
         {
-            var serializedXeroToken = File.ReadAllText(_serializedXeroTokenPath);
+            var serializedXeroToken = await File.ReadAllTextAsync(_serializedXeroTokenPath);
             var xeroToken = JsonConvert.DeserializeObject<XeroOAuth2Token>(serializedXeroToken);
 
-            return xeroToken;
+            return await Task.FromResult(xeroToken);
         }
 
-        public bool TokenExists()
+        public async Task<bool> TokenExists()
         {
             var fileExist = File.Exists(_serializedXeroTokenPath);
 
-            return fileExist;
+            return await Task.FromResult(fileExist); ;
         }
 
-        public void DestroyToken()
+        public async Task DestroyToken()
         {
-            File.Delete(_serializedXeroTokenPath);
+            await Task.Run(() =>
+            {
+                File.Delete(_serializedXeroTokenPath);
+            });
         }
     }
 }

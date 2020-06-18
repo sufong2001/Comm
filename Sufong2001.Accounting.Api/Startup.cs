@@ -9,10 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Sufong2001.Accounting.Api;
 using Sufong2001.Accounting.Api.Functions;
+using Sufong2001.Accounting.Api.Functions.Authorization.Token;
 using Sufong2001.Accounting.Api.Storage;
 using Sufong2001.Accounting.Xero;
+using Sufong2001.Accounting.Xero.Authorization;
 using Sufong2001.Accounting.Xero.Webhooks;
 using Sufong2001.Accounting.Xero.Webhooks.Config;
+using Xero.NetStandard.OAuth2.Api;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Config;
 using ContainerBuilder = Autofac.ContainerBuilder;
@@ -94,13 +97,19 @@ namespace Sufong2001.Accounting.Api
 
             builder
                 .RegisterAssemblyTypes(typeof(Startup).Assembly)
-                .InNamespace(typeof(IStorage).Namespace ?? string.Empty)
+                .InNamespace(typeof(IStorageEnitity).Namespace ?? string.Empty)
                 .AsImplementedInterfaces()
                 .SingleInstance(); // This will scope nested dependencies to each function execution
 
-            //builder.RegisterType<TokenContainer>()
-            //    .As<ITokenStore>()
-            //    .SingleInstance();
+            builder
+                .RegisterAssemblyTypes(typeof(AccountingApi).Assembly)
+                .InNamespace(typeof(AccountingApi).Namespace ?? string.Empty)
+                .AsSelf()
+                .SingleInstance();
+
+            builder.RegisterType<TokenTable>()
+                .As<ITokenStore>()
+                .SingleInstance();
         }
 
         /// <summary>

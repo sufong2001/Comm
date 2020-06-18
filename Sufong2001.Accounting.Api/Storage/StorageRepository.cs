@@ -3,17 +3,15 @@ using Microsoft.Azure.Cosmos.Table;
 using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
+using Sufong2001.Accounting.Api.Functions.Authorization.Names;
+using Sufong2001.Accounting.Api.Functions.Webhooks.Names;
+using Sufong2001.Accounting.Api.Storage.Names;
 using Sufong2001.Core.Storage.Interfaces;
+using Sufong2001.Share.Assembly;
 using Sufong2001.Share.String;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Sufong2001.Accounting.Api.Functions.Authorization.Names;
-using Sufong2001.Accounting.Api.Functions.Webhooks.Names;
-using Sufong2001.Share.Arrays;
-using Sufong2001.Share.Assembly;
-using DatabaseName = Sufong2001.Accounting.Api.Functions.Authorization.Names.DatabaseName;
-using PartitionKeyName = Sufong2001.Accounting.Api.Functions.Authorization.Names.PartitionKeyName;
 
 namespace Sufong2001.Accounting.Api.Storage
 {
@@ -42,7 +40,15 @@ namespace Sufong2001.Accounting.Api.Storage
         public async Task<bool[]> CreateStorageIfNotExists()
         {
             Database database = await _cosmosClient.CreateDatabaseIfNotExistsAsync(nameof(DatabaseName.Sufong2001));
-            var container = await database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKeyName.pk)}");
+
+            var containers = new[]
+            {
+                database.CreateContainerIfNotExistsAsync(nameof(ContainerName.AccoTokens), $"/{nameof(PartitionKeyName.pk)}"),
+                database.CreateContainerIfNotExistsAsync(nameof(WebhookContainerName.WebhookPayloads), $"/{nameof(PartitionKeyName.pk)}"),
+                database.CreateContainerIfNotExistsAsync(nameof(CommonContainerName.DataList), $"/{nameof(PartitionKeyName.pk)}")
+            };
+
+            await Task.WhenAll(containers);
 
             var cloudTables = Enum.GetNames(typeof(ContainerName))
                  .Select(n => _cloudTableClient.GetTableReference(n).CreateIfNotExistsAsync())

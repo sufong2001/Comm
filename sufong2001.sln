@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Accounting.Xero"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Core", "Sufong2001.Core\Sufong2001.Core.csproj", "{34ED7D04-8D8C-4069-9DC1-A5C634764E5A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sufong2001.Accounting.Tests", "Sufong2001.Accounting.Tests\Sufong2001.Accounting.Tests.csproj", "{38041E89-9522-4841-A9C3-D8102FCF8E8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sufong2001.Accounting.Tests", "Sufong2001.Accounting.Tests\Sufong2001.Accounting.Tests.csproj", "{38041E89-9522-4841-A9C3-D8102FCF8E8D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

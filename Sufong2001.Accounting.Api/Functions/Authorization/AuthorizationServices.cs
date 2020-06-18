@@ -7,20 +7,21 @@ using Sufong2001.Accounting.Api.Functions.Authorization.Names;
 using Sufong2001.Accounting.Api.Functions.Authorization.Token;
 using System.Linq;
 using System.Threading.Tasks;
+using Sufong2001.Accounting.Xero.Authorization;
 using Xero.NetStandard.OAuth2.Client;
 using Xero.NetStandard.OAuth2.Token;
 
 namespace Sufong2001.Accounting.Api.Functions.Authorization
 {
-    public class AuthorizationServices
+    public class AuthorizationServices : IAzFunc
     {
         private readonly XeroClient _client;
-        private readonly ITokenStore _tokenStorage;
+        private readonly ITokenStore _tokenStore;
 
-        public AuthorizationServices(XeroClient client, ITokenStore tokenStorage)
+        public AuthorizationServices(XeroClient client, ITokenStore tokenStore)
         {
             _client = client;
-            _tokenStorage = tokenStorage;
+            _tokenStore = tokenStore;
         }
 
         [FunctionName(nameof(AuthorizationServiceNames.Authorization))]
@@ -42,7 +43,7 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
 
             var xeroToken = (XeroOAuth2Token)await _client.RequestXeroTokenAsync(code);
 
-            await _tokenStorage.StoreToken(xeroToken);
+            await _tokenStore.StoreToken(xeroToken);
 
             return new OkResult();
         }
@@ -53,7 +54,7 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = await _tokenStorage.GetStoredToken();
+            var xeroToken = await _tokenStore.GetStoredToken();
 
             var tenants = await _client.GetConnectionsAsync(xeroToken);
 
@@ -66,11 +67,11 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = await _tokenStorage.GetStoredToken();
+            var xeroToken = await _tokenStore.GetStoredToken();
 
             xeroToken = (XeroOAuth2Token)await _client.RefreshAccessTokenAsync(xeroToken);
 
-            await _tokenStorage.StoreToken(xeroToken);
+            await _tokenStore.StoreToken(xeroToken);
 
             return new JsonResult(xeroToken);
         }
@@ -81,12 +82,12 @@ namespace Sufong2001.Accounting.Api.Functions.Authorization
             , ILogger log
         )
         {
-            var xeroToken = await _tokenStorage.GetStoredToken("");
+            var xeroToken = await _tokenStore.GetStoredToken("");
 
             var xeroTenant = xeroToken.Tenants.First();
             await _client.DeleteConnectionAsync(xeroToken, xeroTenant);
 
-            await _tokenStorage.DestroyToken();
+            await _tokenStore.DestroyToken();
 
             return new JsonResult(xeroTenant);
         }
